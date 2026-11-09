@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gestion hôtelière</title>
+<meta name="description" content="Gestion d'hôtels, auberges, chambres et appartements meublés : réservations, planning, réception, facturation, ménage, services, caisse et rapports.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --rail:#1b2a38; --rail-2:#14202b; --rail-fg:#d9e3ec; --rail-dim:#8fa3b4;
+  --bg:#f4f5f2; --surface:#ffffff; --surface-2:#f0f1ed; --line:#dfe2dc; --line-2:#c9cdc5;
+  --fg:#1b2329; --fg-2:#4d5961; --fg-3:#7c878e;
+  --accent:#8a5a14; --accent-strong:#734a0f; --accent-soft:#f6ecdc; --accent-fg:#ffffff;
+  --good:#1e7f4c; --good-soft:#e2f2e8; --warn:#a85d06; --warn-soft:#fbefdc; --bad:#b8352a; --bad-soft:#f9e5e2;
+  --info:#255f94; --info-soft:#e3edf7; --muted:#5f6b73; --muted-soft:#eceeea;
+  --shadow:0 1px 2px rgba(20,30,40,.06),0 4px 14px rgba(20,30,40,.05);
+  --f-display:"Lexend",system-ui,sans-serif; --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:10px; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --rail:#111a22; --rail-2:#0c1319; --bg:#0f151a; --surface:#172028; --surface-2:#1d2832; --line:#2a3743; --line-2:#3a4956;
+  --fg:#e6ebee; --fg-2:#a9b5bd; --fg-3:#7f8c95;
+  --accent:#e2b25e; --accent-strong:#f0c477; --accent-soft:#3a2e1a; --accent-fg:#1c1406;
+  --good:#5cc88b; --good-soft:#163323; --warn:#f0a94f; --warn-soft:#3a2914; --bad:#f07a6e; --bad-soft:#3d1d1a;
+  --info:#82b6ea; --info-soft:#17293b; --muted:#a3adb4; --muted-soft:#232e37;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --rail:#111a22; --rail-2:#0c1319; --bg:#0f151a; --surface:#172028; --surface-2:#1d2832; --line:#2a3743; --line-2:#3a4956;
+  --fg:#e6ebee; --fg-2:#a9b5bd; --fg-3:#7f8c95;
+  --accent:#e2b25e; --accent-strong:#f0c477; --accent-soft:#3a2e1a; --accent-fg:#1c1406;
+  --good:#5cc88b; --good-soft:#163323; --warn:#f0a94f; --warn-soft:#3a2914; --bad:#f07a6e; --bad-soft:#3d1d1a;
+  --info:#82b6ea; --info-soft:#17293b; --muted:#a3adb4; --muted-soft:#232e37;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.n,.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono);font-size:.9em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dim{color:var(--fg-3)} .small{font-size:13px}
+
+/* shell */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100%}
+.rail{background:var(--rail);color:var(--rail-fg);position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column}
+.brand{display:flex;gap:10px;align-items:center;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.brand .logo{width:36px;height:36px;border-radius:9px;background:#c9953f;display:grid;place-items:center;color:#1b1206;flex:none}
+.brand b{display:block;font-family:var(--f-display);font-size:15px;line-height:1.2;color:#fff;overflow-wrap:anywhere}
+.brand small{color:var(--rail-dim);font-size:12px}
+nav{padding:10px 8px;display:flex;flex-direction:column;gap:2px;flex:1}
+nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--rail-fg);text-decoration:none;font-weight:500;font-size:14.5px}
+nav a svg{width:18px;height:18px;opacity:.75;flex:none}
+nav a:hover{background:rgba(255,255,255,.06)}
+nav a[aria-current="page"]{background:rgba(226,178,94,.16);color:#fff}
+nav a[aria-current="page"] svg{opacity:1;color:#e2b25e}
+nav a .badge{margin-left:auto;background:#c9953f;color:#1b1206;border-radius:99px;font-size:11.5px;padding:0 7px;font-weight:700}
+.rail-foot{padding:12px 16px;font-size:12px;color:var(--rail-dim);border-top:1px solid rgba(255,255,255,.07)}
+main{min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;padding:16px 28px;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5}
+.top h1{font-size:20px;flex:1;min-width:0}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#menu-btn{display:none}
+#view{padding:22px 28px 60px;max-width:1400px;width:100%}
+
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap;text-decoration:none;color:var(--fg)}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.primary:hover{background:var(--accent-strong)}
+.btn.good{background:var(--good);border-color:var(--good);color:#fff}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{height:30px;padding:0 10px;font-size:13px}
+.btn svg{width:16px;height:16px}
+.icon-btn{width:34px;height:34px;padding:0}
+input,select,textarea{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:7px 10px;min-height:36px;width:100%}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox]{width:auto;min-height:0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--fg-2)}
+label.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.span2{grid-column:span 2} .span3{grid-column:1/-1}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.toolbar input,.toolbar select{width:auto;min-width:150px}
+.toolbar .grow{flex:1;min-width:200px}
+fieldset{border:1px solid var(--line);border-radius:var(--r);padding:12px;margin:0}
+legend{font-weight:700;font-size:13px;color:var(--fg-2);padding:0 6px}
+
+/* cards & tables */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.card h2{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h2 .count{font-family:var(--f-body);font-size:13px;color:var(--fg-3);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;box-shadow:var(--shadow)}
+.kpi .l{font-size:12.5px;color:var(--fg-3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.kpi .v{font-family:var(--f-display);font-size:24px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:13px;color:var(--fg-2)}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--fg-3);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2)}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--surface-2)}
+tfoot td{font-weight:700;background:var(--surface-2)}
+.empty{padding:26px;text-align:center;color:var(--fg-3)}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.info{background:var(--info-soft);color:var(--info)}
+.pill.muted{background:var(--muted-soft);color:var(--muted)} .pill.accent{background:var(--accent-soft);color:var(--accent)}
+.amt-pos{color:var(--good)} .amt-neg{color:var(--bad)}
+
+/* booking list items */
+.blist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.bitem{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:9px;padding:6px 6px 6px 10px}
+.bitem .bmain{flex:1;min-width:0;text-align:left;background:none;border:0;padding:2px 0;cursor:pointer;display:flex;flex-direction:column}
+.bitem .bmain b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bitem .bmain span{font-size:13px;color:var(--fg-2)}
+
+/* units */
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.unit{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;border-left:4px solid var(--good)}
+.unit.hk-sale{border-left-color:var(--bad)} .unit.hk-nettoyage{border-left-color:var(--warn)} .unit.hk-inspecter{border-left-color:var(--info)} .unit.ooo{border-left-color:var(--muted);opacity:.85}
+.unit h3{font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.unit .meta{font-size:13px;color:var(--fg-2)}
+.unit .rates{font-size:13px;display:flex;gap:10px;flex-wrap:wrap}
+.unit .row{display:flex;gap:6px;align-items:center}
+.unit select{min-height:30px;padding:3px 8px;font-size:13px}
+
+/* planning */
+.plan-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.plan{min-width:calc(150px + var(--days) * 44px)}
+.prow{display:grid;grid-template-columns:150px repeat(var(--days),minmax(44px,1fr));border-bottom:1px solid var(--line);min-height:40px;position:relative}
+.prow:last-child{border-bottom:0}
+.prow > *{grid-row:1}
+.prow .lab{padding:6px 10px;font-weight:600;font-size:13.5px;border-right:1px solid var(--line);position:sticky;left:0;background:var(--surface);z-index:2;display:flex;flex-direction:column;justify-content:center;line-height:1.2}
+.prow .lab small{font-weight:400;color:var(--fg-3);font-size:11.5px}
+.prow .cell{border-right:1px solid var(--line);background:none;border-top:0;border-bottom:0;border-left:0;cursor:pointer;padding:0}
+.prow .cell:hover{background:var(--accent-soft)}
+.prow .cell.we{background:var(--surface-2)}
+.prow .cell.td{background:color-mix(in srgb,var(--accent-soft) 70%,transparent)}
+.prow.head{position:sticky;top:0;background:var(--surface);z-index:3;min-height:44px}
+.prow.head .day{font-size:11.5px;text-align:center;padding:4px 0;border-right:1px solid var(--line);line-height:1.2;color:var(--fg-2)}
+.prow.head .day b{display:block;font-size:14px;color:var(--fg)}
+.prow.head .day.td{background:var(--accent-soft);color:var(--accent)}
+.prow.ooo .lab{color:var(--fg-3)}
+.bar{z-index:1;margin:5px 2px;border-radius:6px;padding:2px 7px;font-size:12px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;border:0;text-align:left;align-self:center;min-height:28px}
+.bar.option{background:var(--warn-soft);color:var(--warn);border:1px dashed var(--warn)}
+.bar.confirmee{background:var(--info);color:#fff} .bar.en_cours{background:var(--good);color:#fff} .bar.terminee{background:var(--muted-soft);color:var(--muted)}
+:root[data-theme="dark"] .bar.confirmee,:root[data-theme="dark"] .bar.en_cours{color:#0b1218}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bar.confirmee,:root:not([data-theme="light"]) .bar.en_cours{color:#0b1218}}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--fg-2);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+
+/* dialog */
+dialog{border:0;border-radius:14px;padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog.wide{width:min(940px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(10,16,22,.5)}
+#dlg-form{display:flex;flex-direction:column;max-height:calc(100dvh - 24px)}
+.dlg-h{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.dlg-h h2{font-size:18px;flex:1}
+#dlg-body{padding:16px 18px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+#dlg-body>*{flex-shrink:0}
+#dlg-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--line);background:var(--surface-2);border-radius:0 0 14px 14px}
+#dlg-foot .sp{flex:1}
+.err{background:var(--bad-soft);color:var(--bad);padding:8px 12px;border-radius:8px;font-weight:600;font-size:14px}
+.err:empty{display:none}
+.hint{font-size:12.5px;color:var(--fg-3);font-weight:400}
+.addrow{display:grid;grid-template-columns:2fr 2fr 70px 110px 140px auto;gap:6px;align-items:end}
+.addrow.pay{grid-template-columns:130px 150px 140px 1fr auto}
+.info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 16px;font-size:14px}
+.info-grid div span{display:block;font-size:12px;color:var(--fg-3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.sec-t{font-family:var(--f-display);font-size:14.5px;font-weight:600;margin:0}
+
+/* setup */
+body.setup .rail,body.setup .top{display:none}
+body.setup .app{grid-template-columns:1fr}
+.setup-card{max-width:760px;margin:40px auto}
+.kinds{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kinds label{border:1px solid var(--line-2);border-radius:10px;padding:12px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.kinds label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.kinds b{display:block} .kinds small{color:var(--fg-2)}
+
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;z-index:100;pointer-events:none}
+#toast div{background:#1b2a38;color:#fff;padding:10px 16px;border-radius:9px;box-shadow:var(--shadow);font-weight:600;font-size:14px;max-width:min(520px,90vw)}
+#toast div.bad{background:#a32d22} #toast div.warn{background:#8f4f05}
+#print-area{display:none}
+
+@media (max-width:1100px){.cols3{grid-template-columns:1fr 1fr}.addrow{grid-template-columns:1fr 1fr 70px 1fr}.addrow.pay{grid-template-columns:1fr 1fr}}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:260px;z-index:50;transform:translateX(-100%);transition:transform .2s}
+  body.nav-open .rail{transform:none;box-shadow:0 0 40px rgba(0,0,0,.4)}
+  #menu-btn{display:inline-flex}
+  .top{padding:12px 16px}
+  #view{padding:16px 16px 60px}
+  .cols3,.cols2,.grid3,.grid4{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}.span2{grid-column:auto}
+  .info-grid{grid-template-columns:1fr 1fr}
+  .addrow,.addrow.pay{grid-template-columns:1fr 1fr}
+  .kinds{grid-template-columns:1fr}
+  .toolbar input,.toolbar select{min-width:0;flex:1}
+  .top .btn .lbl{display:none}
+}
+@media print{
+  body>*:not(#print-area){display:none!important}
+  #print-area{display:block;color:#000;font-family:var(--f-body);font-size:12.5px}
+  @page{margin:14mm}
+}
+.doc h1{font-size:22px} .doc table{font-size:12.5px} .doc th{background:#eee;color:#333}
+.doc td,.doc th{border-bottom:1px solid #ccc;padding:6px 8px}
+.doc .hd{display:flex;justify-content:space-between;gap:20px;margin-bottom:18px;border-bottom:2px solid #000;padding-bottom:10px}
+.doc .tot td{font-weight:700}
+.doc .fl{display:grid;grid-template-columns:200px 1fr;gap:4px 12px;margin:10px 0}
+.doc .fl div:nth-child(odd){color:#555}
+.doc .sign{display:flex;justify-content:space-between;margin-top:50px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" id="rail">
+    <div class="brand"><div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V9l9-5 9 5v11"/><path d="M9 20v-6h6v6"/></svg></div><div><b id="brand-name"></b><small id="brand-kind"></small></div></div>
+    <nav id="nav"></nav>
+    <div class="rail-foot" id="rail-foot"></div>
+  </aside>
+  <main>
+    <header class="top">
+      <button class="btn ghost icon-btn" id="menu-btn" data-act="menu" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <h1 id="title"></h1>
+      <div class="top-actions" id="top-actions"></div>
+    </header>
+    <div id="view"></div>
+  </main>
+</div>
+<dialog id="dlg"><form id="dlg-form" novalidate>
+  <div class="dlg-h"><h2 id="dlg-title"></h2><button type="button" class="btn ghost icon-btn" data-act="close" aria-label="Fermer">✕</button></div>
+  <div id="dlg-body"></div>
+  <div id="dlg-foot"></div>
+</form></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="print-area"></div>
+<input type="file" id="import-file" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+/* ============ Constantes ============ */
+const KEY='hg-data-v1';
+const KINDS={
+  hotel:{label:'Hôtel',desc:'Chambres à la nuitée, restaurant, bar, services aux clients.',unit:'Chambre',units:'Chambres',types:['Single','Double','Twin','Suite']},
+  auberge:{label:'Auberge',desc:'Lits en dortoir et chambres privées, à prix doux.',unit:'Lit / chambre',units:'Lits & chambres',types:['Lit en dortoir','Chambre privée','Chambre familiale']},
+  meuble:{label:'Chambres & appartements meublés',desc:'Séjours à la nuit, à la semaine ou au mois.',unit:'Logement',units:'Logements',types:['Chambre meublée','Studio','Appartement T2','Appartement T3']},
+  mixte:{label:'Établissement mixte',desc:'Un peu de tout : chambres, suites, studios, dortoirs.',unit:'Hébergement',units:'Hébergements',types:['Chambre','Suite','Studio','Appartement','Lit en dortoir']}
+};
+const CATS={restaurant:'Restaurant',petitdej:'Petit-déjeuner',bar:'Bar',minibar:'Minibar',blanchisserie:'Blanchisserie',transport:'Transport',menage:'Ménage',charges:'Charges (eau, électricité…)',salle:'Salle / événement',bienetre:'Bien-être',autre:'Autre'};
+const BST={option:['Option','warn'],confirmee:['Confirmée','info'],en_cours:['En séjour','good'],terminee:['Partie','muted'],annulee:['Annulée','bad'],noshow:['Non présenté','bad']};
+const HK={propre:['Propre','good'],sale:['À nettoyer','bad'],nettoyage:['Nettoyage en cours','warn'],inspecter:['À inspecter','info']};
+const PAY={especes:'Espèces',mobile:'Mobile Money',carte:'Carte bancaire',virement:'Virement',cheque:'Chèque'};
+const SOURCES=['Comptoir','Téléphone','WhatsApp','Site web','Booking.com','Airbnb','Expedia','Agence / entreprise','Autre'];
+const PRIO={basse:['Basse','muted'],normale:['Normale','info'],haute:['Haute','warn'],urgente:['Urgente','bad']};
+const TST={ouvert:['À faire','warn'],en_cours:['En cours','info'],fait:['Fait','good']};
+const EXP_CATS=['Achats restaurant / bar','Produits d’entretien','Linge','Maintenance & réparations','Électricité','Eau','Internet / téléphone','Salaires','Loyer','Impôts & taxes','Divers'];
+const ID_TYPES=['CNI','Passeport','Titre de séjour','Permis de conduire','Autre'];
+
+/* ============ Outils ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const pd=s=>{const[y,m,d]=String(s).split('-').map(Number);return Date.UTC(y,m-1,d)};
+const addDays=(s,n)=>new Date(pd(s)+n*864e5).toISOString().slice(0,10);
+const diff=(a,b)=>Math.round((pd(b)-pd(a))/864e5);
+const validDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'');
+const fD=(s,o)=>s&&validDate(s)?new Intl.DateTimeFormat('fr-FR',{...(o||{day:'numeric',month:'short',year:'numeric'}),timeZone:'UTC'}).format(pd(s)):'—';
+const fDs=s=>fD(s,{day:'numeric',month:'short'});
+const num=v=>{const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+const fmtN=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(Math.round(n||0));
+const money=n=>fmtN(n)+' '+(S.settings.currency||'');
+const pill=([l,c])=>`<span class="pill ${c}">${esc(l)}</span>`;
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const monthStart=()=>today().slice(0,8)+'01';
+const plural=(n,w)=>n+' '+w+(Math.abs(n)>1?'s':'');
+function toast(msg,kind){const d=document.createElement('div');d.textContent=msg;if(kind)d.className=kind;const box=$('#toast');box.append(d);while(box.children.length>3)box.firstChild.remove();setTimeout(()=>d.remove(),3800)}
+function download(name,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{const s=String(v??'');return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}).join(';')).join('\n')}
+const IC={
+ today:'<path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+ planning:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M13 17h4"/>',
+ reservations:'<path d="M5 3h11l3 3v15H5z"/><path d="M9 9h6M9 13h6M9 17h4"/>',
+ clients:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/>',
+ unites:'<path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6M3 18h18M3 21v-3M21 21v-3"/><path d="M6 10V7a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>',
+ menage:'<path d="M14 3l-3 9"/><path d="M6 13h10l2 8H4z"/><path d="M9 17v4M13 17v4"/>',
+ services:'<path d="M4 17h16M6 17a6 6 0 0 1 12 0M12 8V6M10 6h4"/><path d="M3 20h18"/>',
+ caisse:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14.5" r="1.5"/>',
+ rapports:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ parametres:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>', print:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+ dl:'<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>'
+};
+const ico=(k)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]||''}</svg>`;
+
+/* ============ Données ============ */
+function blank(){return{v:1,settings:{name:'',kind:'hotel',address:'',phone:'',email:'',taxId:'',currency:'FCFA',taxeSejour:0,tva:0,checkin:'14:00',checkout:'12:00',invoiceSeq:1,bookingSeq:1,footer:'Merci de votre séjour et à bientôt !',theme:''},units:[],guests:[],bookings:[],services:[],tasks:[],cash:[]}}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const d=JSON.parse(r);const b=blank();return Object.assign(b,d,{settings:Object.assign(b.settings,d.settings||{})})}}catch(e){}return blank()}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Enregistrement impossible : le stockage du navigateur est indisponible ou plein.','bad')}}
+const K=()=>KINDS[S.settings.kind]||KINDS.hotel;
+const unitOf=id=>S.units.find(u=>u.id===id);
+const guestOf=id=>S.guests.find(g=>g.id===id);
+const bk=id=>S.bookings.find(b=>b.id===id);
+const gName=g=>g?((g.lastName||'').toUpperCase()+' '+(g.firstName||'')).trim()||'Client sans nom':'Client supprimé';
+const isActive=b=>b.status!=='annulee'&&b.status!=='noshow';
+const nights=b=>Math.max(0,diff(b.checkIn,b.checkOut));
+const unitsSorted=()=>[...S.units].sort((a,b)=>String(a.name).localeCompare(String(b.name),'fr',{numeric:true}));
+function autoRate(u,n){if(!u||n<=0)return 0;if(n>=28&&num(u.rateMonth))return Math.round(n*num(u.rateMonth)/30);if(n>=7&&num(u.rateWeek))return Math.round(n*num(u.rateWeek)/7);return n*num(u.rateNight)}
+function rateBasis(u,n){if(!u||n<=0)return '';if(n>=28&&num(u.rateMonth))return 'tarif mensuel ('+money(u.rateMonth)+' / 30 nuits)';if(n>=7&&num(u.rateWeek))return 'tarif hebdomadaire ('+money(u.rateWeek)+' / 7 nuits)';return 'tarif nuitée ('+money(u.rateNight)+' × '+n+')'}
+function folio(b){const n=nights(b);const lodging=num(b.rate);const tax=num(S.settings.taxeSejour)*num(b.adults)*n;const extras=sum(b.charges||[],c=>num(c.qty)*num(c.price));const total=lodging+tax+extras;const paid=sum(b.payments||[],p=>num(p.amount));return{n,lodging,tax,extras,total,paid,balance:total-paid}}
+function occupantOn(unitId,d){return S.bookings.find(b=>b.unitId===unitId&&isActive(b)&&b.checkIn<=d&&d<b.checkOut)}
+function conflict(b){return S.bookings.find(o=>o.id!==b.id&&o.unitId===b.unitId&&isActive(o)&&o.checkIn<b.checkOut&&b.checkIn<o.checkOut)}
+function nextRef(){return 'R'+String(S.settings.bookingSeq++).padStart(4,'0')}
+function assignInvoice(b){if(!b.invoiceNo){b.invoiceNo='F'+today().slice(0,4)+'-'+String(S.settings.invoiceSeq++).padStart(4,'0')}}
+function movements(from,to){const out=[];
+  for(const b of S.bookings)for(const p of b.payments||[])if(p.date>=from&&p.date<=to)out.push({date:p.date,label:'Séjour '+b.ref+' · '+gName(guestOf(b.guestId))+(p.note?' · '+p.note:''),cat:'Séjour',method:p.method,amount:num(p.amount),bid:b.id});
+  for(const c of S.cash)if(c.date>=from&&c.date<=to)out.push({date:c.date,label:c.label,cat:c.category,method:c.method,amount:c.type==='depense'?-num(c.amount):num(c.amount),cid:c.id});
+  return out.sort((a,b)=>b.date.localeCompare(a.date))}
+
+/* ============ Données de démonstration ============ */
+function defaultServices(kind){
+  const s=[['Petit-déjeuner','petitdej',3000],['Plat du jour','restaurant',5000],['Boisson non alcoolisée','bar',1000],['Bière','bar',1500],['Eau minérale 1,5 L','minibar',800],['Lavage / repassage (pièce)','blanchisserie',1000],['Navette aéroport','transport',15000]];
+  if(kind==='hotel'||kind==='mixte')s.push(['Dîner complet','restaurant',9000],['Location salle de réunion (demi-journée)','salle',50000]);
+  if(kind==='auberge')s.push(['Location de serviette','autre',500],['Casier (par jour)','autre',500],['Laverie (machine)','blanchisserie',2000]);
+  if(kind==='meuble'||kind==='mixte')s.push(['Ménage supplémentaire','menage',5000],['Électricité (kWh)','charges',110],['Eau (m³)','charges',600],['Changement de linge','menage',3000]);
+  return s.map(([name,category,price])=>({id:uid(),name,category,price,active:true}))}
+function demoUnits(kind){
+  const U=(name,type,capacity,n,w,m,floor)=>({id:uid(),name,type,capacity,rateNight:n,rateWeek:w,rateMonth:m,floor:floor||'',hk:'propre',outOfOrder:false,notes:''});
+  if(kind==='auberge')return[...[1,2,3,4,5,6].map(i=>U('Dortoir A · lit '+i,'Lit en dortoir',1,8000,48000,150000,'RDC')),...[1,2,3,4].map(i=>U('Dortoir B · lit '+i,'Lit en dortoir',1,8000,48000,150000,'RDC')),U('Chambre 1','Chambre privée',2,20000,120000,0,'1er'),U('Chambre 2','Chambre privée',2,20000,120000,0,'1er'),U('Chambre 3','Chambre familiale',4,30000,180000,0,'1er')];
+  if(kind==='meuble')return[U('Chambre meublée 1','Chambre meublée',1,15000,90000,220000),U('Chambre meublée 2','Chambre meublée',1,15000,90000,220000),U('Studio A','Studio',2,30000,180000,450000),U('Studio B','Studio',2,30000,180000,450000),U('Studio C','Studio',2,30000,180000,450000),U('Appartement T2 – 1','Appartement T2',3,45000,270000,750000),U('Appartement T2 – 2','Appartement T2',3,45000,270000,750000),U('Appartement T3','Appartement T3',5,65000,390000,1000000)];
+  if(kind==='mixte')return[U('101','Chambre',2,25000,150000,0,'1er'),U('102','Chambre',2,25000,150000,0,'1er'),U('103','Chambre',2,25000,150000,0,'1er'),U('201','Suite',3,60000,360000,0,'2e'),U('Studio 1','Studio',2,35000,210000,500000),U('Studio 2','Studio',2,35000,210000,500000),U('Appartement 1','Appartement',4,55000,330000,850000),U('Dortoir · lit 1','Lit en dortoir',1,9000,54000,0),U('Dortoir · lit 2','Lit en dortoir',1,9000,54000,0),U('Dortoir · lit 3','Lit en dortoir',1,9000,54000,0)];
+  return[U('101','Single',1,25000,150000,0,'1er'),U('102','Double',2,35000,210000,0,'1er'),U('103','Double',2,35000,210000,0,'1er'),U('104','Twin',2,35000,210000,0,'1er'),U('201','Double',2,35000,210000,0,'2e'),U('202','Double',2,35000,210000,0,'2e'),U('203','Twin',2,35000,210000,0,'2e'),U('204','Single',1,25000,150000,0,'2e'),U('301','Suite',3,75000,450000,0,'3e'),U('302','Suite',3,75000,450000,0,'3e')]}
+function seedDemo(kind){
+  const t=today();
+  S.units=demoUnits(kind);S.services=defaultServices(kind);
+  const G=(lastName,firstName,phone,nationality,idType,idNumber)=>({id:uid(),lastName,firstName,phone,email:'',nationality,idType,idNumber,birthDate:'',address:'',notes:'',createdAt:t});
+  S.guests=[G('Mbarga','Paul','+237 6 70 00 00 01','Camerounaise','CNI','100000001'),G('Nguema','Aline','+241 06 00 00 02','Gabonaise','Passeport','GA000002'),G('Diallo','Mamadou','+221 77 000 00 03','Sénégalaise','Passeport','SN000003'),G('Kouassi','Ruth','+225 07 00 00 04','Ivoirienne','CNI','CI000004'),G('Martin','Sophie','+33 6 00 00 00 05','Française','Passeport','FR000005'),G('Fotso','Éric','+237 6 90 00 00 06','Camerounaise','CNI','100000006'),G('Ndiaye','Fatou','+221 76 000 00 07','Sénégalaise','CNI','SN000007')];
+  const u=S.units.filter(x=>x.type!=='Lit en dortoir'||kind==='auberge');
+  const gs=S.guests, svc=S.services;
+  const mk=(gi,ui,inOff,outOff,status,source,extra)=>{const unit=u[ui%u.length];const b={id:uid(),ref:nextRef(),guestId:gs[gi%gs.length].id,unitId:unit.id,checkIn:addDays(t,inOff),checkOut:addDays(t,outOff),adults:Math.min(2,unit.capacity||1),children:0,status,source,notes:'',manualRate:false,charges:[],payments:[],createdAt:addDays(t,Math.min(inOff,0)-3)};b.rate=autoRate(unit,nights(b));if(extra)extra(b);if(!conflict(b))S.bookings.push(b);return b};
+  const ch=(b,si,qty,off)=>{const s=svc[si%svc.length];b.charges.push({id:uid(),date:addDays(t,off),serviceId:s.id,label:s.name,category:s.category,qty,price:s.price})};
+  const py=(b,amount,method,off)=>b.payments.push({id:uid(),date:addDays(t,off),amount,method,note:''});
+  mk(0,0,-2,1,'en_cours','Téléphone',b=>{ch(b,0,2,-1);ch(b,3,4,-1);py(b,b.rate/2,'especes',-2)});
+  mk(1,1,-3,0,'en_cours','Booking.com',b=>{ch(b,0,3,-2);ch(b,5,6,-1);py(b,b.rate,'carte',-3)});
+  mk(2,2,0,3,'confirmee','WhatsApp',b=>py(b,20000,'mobile',-1));
+  mk(3,3,0,2,'option','Site web');
+  mk(4,4,-1,6,'en_cours','Airbnb',b=>{py(b,b.rate,'virement',-1);ch(b,6,1,-1)});
+  mk(5,5,2,5,'confirmee','Agence / entreprise');
+  mk(6,6,4,12,'confirmee','Comptoir');
+  mk(0,7,-9,-5,'terminee','Comptoir',b=>{ch(b,1,3,-7);py(b,folio(b).total,'especes',-5);assignInvoice(b)});
+  mk(3,0,-8,-4,'terminee','Booking.com',b=>{py(b,folio(b).total,'carte',-4);assignInvoice(b)});
+  mk(2,u.length-1,-15,-10,'terminee','Téléphone',b=>{ch(b,2,5,-12);py(b,folio(b).total,'mobile',-10);assignInvoice(b)});
+  if(kind==='meuble'||kind==='mixte')mk(1,u.length-2,-12,20,'en_cours','Agence / entreprise',b=>{b.adults=2;py(b,Math.round(b.rate/2),'virement',-12)});
+  mk(4,2,-1,-1+1,'noshow','Booking.com');
+  S.units[1].hk='sale';if(S.units[8])S.units[8].hk='inspecter';if(S.units[9])S.units[9].outOfOrder=true;
+  S.tasks=[{id:uid(),unitId:S.units[1].id,kind:'menage',title:'Ménage de recouche',priority:'normale',status:'ouvert',assignee:'Marie',createdAt:t,doneAt:''},{id:uid(),unitId:(S.units[9]||S.units[0]).id,kind:'maintenance',title:'Climatiseur en panne',priority:'haute',status:'en_cours',assignee:'Technicien',createdAt:addDays(t,-1),doneAt:''},{id:uid(),unitId:S.units[3].id,kind:'maintenance',title:'Ampoule salle de bain à changer',priority:'basse',status:'ouvert',assignee:'',createdAt:t,doneAt:''}];
+  S.cash=[{id:uid(),date:t,type:'recette',category:'Restaurant',serviceCat:'restaurant',label:'Plat du jour × 3 (client de passage)',amount:15000,method:'especes'},{id:uid(),date:addDays(t,-1),type:'depense',category:'Produits d’entretien',label:'Détergents et serpillières',amount:12500,method:'especes'},{id:uid(),date:addDays(t,-2),type:'depense',category:'Achats restaurant / bar',label:'Marché : légumes, poisson',amount:38000,method:'especes'}];
+}
+
+/* ============ Dialogue ============ */
+let dlgSubmit=null;
+function openDlg({title,body,foot,onSubmit,wide,submitLabel}){
+  const d=$('#dlg');$('#dlg-title').textContent=title;
+  $('#dlg-body').oninput=$('#dlg-body').onchange=null;
+  $('#dlg-body').innerHTML='<div class="err" id="dlg-err"></div>'+body;
+  $('#dlg-foot').innerHTML=foot??`<button type="button" class="btn ghost" data-act="close">Annuler</button><button class="btn primary" type="submit">${esc(submitLabel||'Enregistrer')}</button>`;
+  d.classList.toggle('wide',!!wide);dlgSubmit=onSubmit||null;
+  if(!d.open)d.showModal();
+  const first=$('#dlg-body input:not([type=hidden]):not([readonly]),#dlg-body select');if(first&&onSubmit)first.focus();
+}
+function closeDlg(){const d=$('#dlg');if(d.open)d.close();dlgSubmit=null}
+function dlgErr(m){const e=$('#dlg-err');if(e){e.textContent=m;e.scrollIntoView({block:'nearest'})}}
+$('#dlg-form').addEventListener('submit',e=>{e.preventDefault();if(!dlgSubmit)return;const fd=Object.fromEntries(new FormData(e.target));const err=dlgSubmit(fd);if(err){dlgErr(err);return}if(err!==false)closeDlg();save();render()});
+const opt=(v,l,sel)=>`<option value="${esc(v)}"${String(v)===String(sel)?' selected':''}>${esc(l)}</option>`;
+const opts=(obj,sel)=>Object.entries(obj).map(([k,v])=>opt(k,Array.isArray(v)?v[0]:v,sel)).join('');
+const optsArr=(arr,sel)=>arr.map(v=>opt(v,v,sel)).join('');
+
+/* ============ Rendu & navigation ============ */
+const NAV=[['today','Aujourd’hui'],['planning','Planning'],['reservations','Réservations'],['clients','Clients'],['unites',null],['menage','Ménage & maintenance'],['services','Services & ventes'],['caisse','Caisse'],['rapports','Rapports'],['parametres','Paramètres']];
+let route='today';
+function applyTheme(){if(S.settings.theme)document.documentElement.dataset.theme=S.settings.theme;else delete document.documentElement.dataset.theme}
+function render(){
+  applyTheme();
+  if(!S.settings.name){document.body.classList.add('setup');renderSetup();return}
+  document.body.classList.remove('setup');
+  route=(location.hash.replace(/^#\/?/,'')||'today');if(!VIEWS[route])route='today';
+  const t=today();
+  const badges={today:S.bookings.filter(b=>(['option','confirmee'].includes(b.status)&&b.checkIn<=t)||(b.status==='en_cours'&&b.checkOut<=t)).length,menage:S.tasks.filter(x=>x.status!=='fait').length};
+  $('#nav').innerHTML=NAV.map(([k,l])=>`<a href="#/${k}"${k===route?' aria-current="page"':''}>${ico(k)}<span>${esc(l||K().units)}</span>${badges[k]?`<span class="badge">${badges[k]}</span>`:''}</a>`).join('');
+  $('#brand-name').textContent=S.settings.name;$('#brand-kind').textContent=K().label;
+  $('#rail-foot').textContent=fD(t,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const v=VIEWS[route];
+  $('#title').textContent=v.title();document.title=v.title()+' · '+S.settings.name;
+  $('#top-actions').innerHTML=v.actions?v.actions():'';
+  $('#view').innerHTML=v.html();
+  v.after&&v.after();
+  document.body.classList.remove('nav-open');
+}
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
+const newBookingBtn=()=>`<button class="btn primary" data-act="new-booking">${ico('plus')}<span class="lbl">Nouvelle réservation</span></button>`;
+
+/* ---------- Écran d'installation ---------- */
+function renderSetup(){
+  $('#view').innerHTML=`<div class="card setup-card"><form id="setup-form">
+  <h1 style="font-size:24px;margin-bottom:4px">Bienvenue</h1>
+  <p class="dim" style="margin-top:0">Configurez votre établissement. Tout pourra être modifié ensuite dans les Paramètres.</p>
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <label class="f">Nom de l’établissement<input name="name" required placeholder="Ex. Hôtel Les Palmiers"></label>
+    <div><div class="f" style="font-size:13px;font-weight:600;color:var(--fg-2);margin-bottom:6px">Type d’établissement</div>
+    <div class="kinds">${Object.entries(KINDS).map(([k,v],i)=>`<label><input type="radio" name="kind" value="${k}"${i===0?' checked':''}><span><b>${esc(v.label)}</b><small>${esc(v.desc)}</small></span></label>`).join('')}</div></div>
+    <div class="grid2"><label class="f">Devise<input name="currency" value="FCFA"></label><label class="f">Téléphone<input name="phone"></label></div>
+    <label class="chk"><input type="checkbox" name="demo" checked> Remplir avec des données d’exemple (hébergements, clients, réservations) pour découvrir l’application</label>
+    <div><button class="btn primary" type="submit">Commencer</button></div>
+  </div></form></div>`;
+  $('#setup-form').addEventListener('submit',e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!f.name.trim()){toast('Indiquez le nom de l’établissement','bad');return}
+    Object.assign(S.settings,{name:f.name.trim(),kind:f.kind,currency:f.currency.trim()||'FCFA',phone:f.phone.trim()});
+    if(f.demo){seedDemo(f.kind);location.hash='#/today'}else{S.services=defaultServices(f.kind);location.hash='#/unites';setTimeout(()=>toast('Commencez par ajouter vos '+K().units.toLowerCase()+'.'),300)}
+    save();render()});
+}
+
+/* ---------- Éléments réutilisables ---------- */
+function bItem(b,act){const g=guestOf(b.guestId),u=unitOf(b.unitId),f=folio(b),t=today();
+  const late=(['option','confirmee'].includes(b.status)&&b.checkIn<t)?' <span class="pill bad">Arrivée en retard</span>':(b.status==='en_cours'&&b.checkOut<t)?' <span class="pill bad">Départ dépassé</span>':'';
+  return `<li class="bitem"><button class="bmain" data-act="open-booking" data-id="${b.id}"><b>${esc(gName(g))}${b.status==='option'?' <span class="pill warn">Option</span>':''}${late}</b><span>${esc(u?.name||'?')} · ${fDs(b.checkIn)} → ${fDs(b.checkOut)} · ${plural(f.n,'nuit')}${f.balance>0.5?` · <span class="amt-neg">reste ${money(f.balance)}</span>`:''}</span></button>${act||''}</li>`}
+const bList=(arr,act,empty)=>arr.length?`<ul class="blist">${arr.map(b=>bItem(b,act?act(b):'')).join('')}</ul>`:`<div class="empty">${esc(empty)}</div>`;
+const kpi=(l,v,s)=>`<div class="kpi"><div class="l">${esc(l)}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+
+/* ============ Vues ============ */
+const F={res:{q:'',st:'actives',when:'avenir'},cli:{q:''},tasks:{st:'ouverts',kind:''},units:{hk:''},cash:{from:'',to:''},rep:{from:'',to:''},plan:{start:'',days:14}};
+const VIEWS={
+/* ---------- Aujourd'hui ---------- */
+today:{title:()=>'Aujourd’hui',actions:newBookingBtn,html(){
+  const t=today();
+  const arr=S.bookings.filter(b=>['option','confirmee'].includes(b.status)&&b.checkIn<=t).sort((a,b)=>a.checkIn.localeCompare(b.checkIn));
+  const dep=S.bookings.filter(b=>b.status==='en_cours'&&b.checkOut<=t);
+  const inh=S.bookings.filter(b=>b.status==='en_cours'&&b.checkOut>t).sort((a,b)=>a.checkOut.localeCompare(b.checkOut));
+  const svc=S.units.filter(u=>!u.outOfOrder);const occ=svc.filter(u=>occupantOn(u.id,t)).length;
+  const rate=svc.length?Math.round(occ*100/svc.length):0;
+  const dirty=S.units.filter(u=>u.hk==='sale'||u.hk==='nettoyage').length;
+  const due=sum(S.bookings.filter(b=>['en_cours','terminee'].includes(b.status)),b=>Math.max(0,folio(b).balance));
+  const mv=movements(t,t);const cin=sum(mv.filter(m=>m.amount>0),m=>m.amount);
+  const upcoming=S.bookings.filter(b=>['option','confirmee'].includes(b.status)&&b.checkIn>t&&b.checkIn<=addDays(t,7)).sort((a,b)=>a.checkIn.localeCompare(b.checkIn));
+  const free=svc.filter(u=>!occupantOn(u.id,t));
+  const lateArr=arr.filter(b=>b.checkIn<t);
+  return `<div class="kpis">
+    ${kpi('Occupation ce soir',rate+' %',`${occ} / ${svc.length} ${esc(K().units.toLowerCase())} en service`)}
+    ${kpi('Arrivées',arr.length,lateArr.length?`<span class="amt-neg">dont ${lateArr.length} en retard</span>`:'prévues aujourd’hui')}
+    ${kpi('Départs',dep.length,'à traiter')}
+    ${kpi('À nettoyer',dirty,`${S.units.filter(u=>u.outOfOrder).length} hors service`)}
+    ${kpi('Encaissé aujourd’hui',money(cin),`Soldes clients dus : ${money(due)}`)}
+  </div>
+  <div class="cols3">
+    <section class="card"><h2>Arrivées <span class="count">${arr.length}</span></h2>${bList(arr,b=>`<button class="btn sm good" data-act="checkin" data-id="${b.id}">Arrivée</button>`,'Aucune arrivée prévue.')}</section>
+    <section class="card"><h2>Départs <span class="count">${dep.length}</span></h2>${bList(dep,b=>`<button class="btn sm primary" data-act="checkout" data-id="${b.id}">Départ</button>`,'Aucun départ à traiter.')}</section>
+    <section class="card"><h2>En séjour <span class="count">${inh.length}</span></h2>${bList(inh,null,'Aucun client en séjour.')}</section>
+  </div>
+  <div class="cols2" style="margin-top:14px">
+    <section class="card"><h2>Arrivées des 7 prochains jours <span class="count">${upcoming.length}</span></h2>${bList(upcoming,null,'Rien de prévu cette semaine.')}</section>
+    <section class="card"><h2>${esc(K().units)} libres ce soir <span class="count">${free.length}</span></h2>${free.length?`<div style="display:flex;flex-wrap:wrap;gap:6px">${free.map(u=>`<button class="btn sm" data-act="new-booking" data-unit="${u.id}" data-date="${t}" title="${esc(u.type)} · ${esc(HK[u.hk][0])}">${esc(u.name)} ${u.hk!=='propre'?'<span class="pill bad" style="font-size:11px">'+esc(HK[u.hk][0])+'</span>':''}</button>`).join('')}</div><p class="hint">Cliquez pour réserver (client de passage).</p>`:'<div class="empty">Complet ce soir.</div>'}</section>
+  </div>`}},
+
+/* ---------- Planning ---------- */
+planning:{title:()=>'Planning',actions:newBookingBtn,html(){
+  const p=F.plan;if(!p.start)p.start=addDays(today(),-2);
+  const days=p.days,t=today();const ds=[...Array(days)].map((_,i)=>addDays(p.start,i));
+  const head=`<div class="prow head"><div class="lab">${esc(K().unit)}</div>${ds.map(d=>{const w=new Date(pd(d)).getUTCDay();return `<div class="day${d===t?' td':''}">${fD(d,{weekday:'short'})}<b>${fD(d,{day:'numeric'})}</b></div>`}).join('')}</div>`;
+  const rows=unitsSorted().map(u=>{
+    const cells=ds.map((d,i)=>{const w=new Date(pd(d)).getUTCDay();return `<button class="cell${d===t?' td':(w===0||w===6)?' we':''}" style="grid-column:${i+2}" data-act="new-booking" data-unit="${u.id}" data-date="${d}" aria-label="Réserver ${esc(u.name)} le ${fD(d)}"></button>`}).join('');
+    const bars=S.bookings.filter(b=>b.unitId===u.id&&isActive(b)).map(b=>{const s=Math.max(0,diff(p.start,b.checkIn)),e=Math.min(days,diff(p.start,b.checkOut));if(e<=s)return '';const g=guestOf(b.guestId);return `<button class="bar ${b.status}" style="grid-column:${s+2}/${e+2}" data-act="open-booking" data-id="${b.id}" title="${esc(gName(g))} · ${fDs(b.checkIn)} → ${fDs(b.checkOut)} · ${esc(BST[b.status][0])}">${esc(gName(g))}</button>`}).join('');
+    return `<div class="prow${u.outOfOrder?' ooo':''}"><div class="lab">${esc(u.name)}<small>${esc(u.type)}${u.outOfOrder?' · hors service':''}</small></div>${cells}${bars}</div>`}).join('');
+  return `<div class="toolbar"><button class="btn" data-act="plan-move" data-n="-${days}" aria-label="Période précédente">◀</button><button class="btn" data-act="plan-today">Aujourd’hui</button><button class="btn" data-act="plan-move" data-n="${days}" aria-label="Période suivante">▶</button>
+    <input type="date" value="${p.start}" data-chg="plan-start" aria-label="Début"><select data-chg="plan-days" aria-label="Durée">${opt(7,'7 jours',days)}${opt(14,'14 jours',days)}${opt(31,'31 jours',days)}</select></div>
+  ${S.units.length?`<div class="plan-wrap"><div class="plan" style="--days:${days}">${head}${rows}</div></div>
+  <div class="legend"><span><i style="background:var(--warn-soft);border:1px dashed var(--warn)"></i>Option</span><span><i style="background:var(--info)"></i>Confirmée</span><span><i style="background:var(--good)"></i>En séjour</span><span><i style="background:var(--muted-soft)"></i>Partie</span><span class="dim">Cliquez sur une case vide pour réserver.</span></div>`:`<div class="card empty">Ajoutez d’abord vos ${esc(K().units.toLowerCase())} dans la rubrique correspondante.</div>`}`}},
+
+/* ---------- Réservations ---------- */
+reservations:{title:()=>'Réservations',actions:()=>`<button class="btn" data-act="export-res">${ico('dl')}<span class="lbl">Exporter</span></button>`+newBookingBtn(),html(){
+  const f=F.res;
+  return `<div class="toolbar"><input class="grow" type="search" placeholder="Rechercher un client, une référence, un ${esc(K().unit.toLowerCase())}…" value="${esc(f.q)}" data-inp="res-q">
+  <select data-chg="res-st">${opt('actives','Actives',f.st)}${opt('tous','Tous statuts',f.st)}${Object.entries(BST).map(([k,v])=>opt(k,v[0],f.st)).join('')}</select>
+  <select data-chg="res-when">${opt('avenir','En cours et à venir',f.when)}${opt('passe','Passées',f.when)}${opt('tout','Toutes dates',f.when)}</select></div><div id="res-list">${resTable()}</div>`}},
+
+/* ---------- Clients ---------- */
+clients:{title:()=>'Clients',actions:()=>`<button class="btn primary" data-act="new-guest">${ico('plus')}<span class="lbl">Nouveau client</span></button>`,html(){
+  return `<div class="toolbar"><input class="grow" type="search" placeholder="Rechercher par nom, téléphone, pièce d’identité…" value="${esc(F.cli.q)}" data-inp="cli-q"></div><div id="cli-list">${cliTable()}</div>`}},
+
+/* ---------- Hébergements ---------- */
+unites:{title:()=>K().units,actions:()=>`<button class="btn primary" data-act="new-unit">${ico('plus')}<span class="lbl">Ajouter</span></button>`,html(){
+  const t=today(),f=F.units;
+  const list=unitsSorted().filter(u=>!f.hk||(f.hk==='ooo'?u.outOfOrder:u.hk===f.hk));
+  const cnt=k=>S.units.filter(u=>u.hk===k).length;
+  return `<div class="toolbar"><select data-chg="units-hk">${opt('','Tous ('+S.units.length+')',f.hk)}${Object.entries(HK).map(([k,v])=>opt(k,v[0]+' ('+cnt(k)+')',f.hk)).join('')}${opt('ooo','Hors service ('+S.units.filter(u=>u.outOfOrder).length+')',f.hk)}</select></div>
+  ${list.length?`<div class="units">${list.map(u=>{const o=occupantOn(u.id,t);const g=o&&guestOf(o.guestId);
+    return `<article class="unit hk-${u.hk}${u.outOfOrder?' ooo':''}"><h3><span>${esc(u.name)}</span>${u.outOfOrder?pill(['Hors service','muted']):o?pill(o.status==='en_cours'?['Occupé','good']:['Réservé ce soir','info']):pill(['Libre','accent'])}</h3>
+    <div class="meta">${esc(u.type)} · ${plural(num(u.capacity)||1,'personne')}${u.floor?' · '+esc(u.floor):''}</div>
+    <div class="rates n"><span>Nuit <b>${money(u.rateNight)}</b></span>${num(u.rateWeek)?`<span>Sem. <b>${money(u.rateWeek)}</b></span>`:''}${num(u.rateMonth)?`<span>Mois <b>${money(u.rateMonth)}</b></span>`:''}</div>
+    ${o?`<button class="btn sm ghost" style="justify-content:flex-start;padding:0" data-act="open-booking" data-id="${o.id}">👤 ${esc(gName(g))} · jusqu’au ${fDs(o.checkOut)}</button>`:''}
+    <div class="row"><select data-chg="hk" data-id="${u.id}" aria-label="État de ménage">${opts(HK,u.hk)}</select><button class="btn sm" data-act="edit-unit" data-id="${u.id}">Modifier</button></div></article>`}).join('')}</div>`:`<div class="card empty">${S.units.length?'Aucun résultat pour ce filtre.':'Aucun '+esc(K().unit.toLowerCase())+' pour l’instant. Cliquez sur « Ajouter ».'}</div>`}`}},
+
+/* ---------- Ménage & maintenance ---------- */
+menage:{title:()=>'Ménage & maintenance',actions:()=>`<button class="btn primary" data-act="new-task">${ico('plus')}<span class="lbl">Nouvelle tâche</span></button>`,html(){
+  const f=F.tasks;const po={urgente:0,haute:1,normale:2,basse:3};
+  const list=S.tasks.filter(x=>(f.st==='tous'||(f.st==='ouverts'?x.status!=='fait':x.status==='fait'))&&(!f.kind||x.kind===f.kind)).sort((a,b)=>(a.status==='fait')-(b.status==='fait')||po[a.priority]-po[b.priority]||b.createdAt.localeCompare(a.createdAt));
+  const dirty=unitsSorted().filter(u=>u.hk!=='propre');
+  return `<div class="card" style="margin-bottom:14px"><h2>État des ${esc(K().units.toLowerCase())} <span class="count">${dirty.length} à traiter</span></h2>${dirty.length?`<div style="display:flex;flex-wrap:wrap;gap:8px">${dirty.map(u=>`<span class="bitem" style="padding:4px 4px 4px 10px"><b>${esc(u.name)}</b> ${pill(HK[u.hk])}<button class="btn sm good" data-act="hk-clean" data-id="${u.id}">Propre</button></span>`).join('')}</div>`:'<div class="dim">Tout est propre. 👍</div>'}</div>
+  <div class="toolbar"><select data-chg="task-st">${opt('ouverts','À faire et en cours',f.st)}${opt('faits','Terminées',f.st)}${opt('tous','Toutes',f.st)}</select><select data-chg="task-kind">${opt('','Ménage et maintenance',f.kind)}${opt('menage','Ménage',f.kind)}${opt('maintenance','Maintenance',f.kind)}</select></div>
+  ${list.length?`<div class="tbl-wrap"><table><thead><tr><th>${esc(K().unit)}</th><th>Type</th><th>Tâche</th><th>Priorité</th><th>Assignée à</th><th>Créée</th><th>Statut</th><th></th></tr></thead><tbody>${list.map(x=>`<tr><td><b>${esc(unitOf(x.unitId)?.name||'—')}</b></td><td>${x.kind==='menage'?'Ménage':'Maintenance'}</td><td>${esc(x.title)}</td><td>${pill(PRIO[x.priority]||PRIO.normale)}</td><td>${esc(x.assignee||'—')}</td><td>${fDs(x.createdAt)}</td><td><select data-chg="task-status" data-id="${x.id}" style="min-height:30px;padding:3px 8px">${opts(TST,x.status)}</select></td><td><button class="btn sm ghost" data-act="edit-task" data-id="${x.id}">Modifier</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="card empty">Aucune tâche.</div>'}`}},
+
+/* ---------- Services & ventes ---------- */
+services:{title:()=>'Services & ventes',actions:()=>`<button class="btn" data-act="new-service">${ico('plus')}<span class="lbl">Ajouter au catalogue</span></button><button class="btn primary" data-act="sale">Vente / consommation</button>`,html(){
+  const by={};for(const s of S.services)(by[s.category]=by[s.category]||[]).push(s);
+  const t=today();const ms=monthStart();
+  const sold={};for(const b of S.bookings)if(isActive(b))for(const c of b.charges||[])if(c.date>=ms&&c.date<=t){sold[c.category]=(sold[c.category]||0)+num(c.qty)*num(c.price)}
+  for(const c of S.cash)if(c.type==='recette'&&c.serviceCat&&c.date>=ms&&c.date<=t)sold[c.serviceCat]=(sold[c.serviceCat]||0)+num(c.amount);
+  return `<div class="kpis">${Object.keys(CATS).filter(k=>sold[k]).map(k=>kpi(CATS[k]+' · ce mois',money(sold[k]))).join('')||kpi('Ventes du mois',money(0),'Aucune vente enregistrée')}</div>
+  <p class="dim small" style="margin-top:-6px">Les consommations peuvent être <b>portées sur la note</b> d’un client en séjour ou <b>encaissées directement</b> (client de passage au restaurant, au bar…).</p>
+  ${Object.keys(CATS).filter(k=>by[k]).map(k=>`<div class="tbl-wrap" style="margin-bottom:12px"><table><thead><tr><th>${esc(CATS[k])}</th><th class="n">Prix</th><th>Statut</th><th></th></tr></thead><tbody>${by[k].map(s=>`<tr${s.active?'':' class="dim"'}><td>${esc(s.name)}</td><td class="n">${money(s.price)}</td><td>${s.active?pill(['Actif','good']):pill(['Inactif','muted'])}</td><td style="text-align:right;white-space:nowrap"><button class="btn sm" data-act="sale" data-id="${s.id}"${s.active?'':' disabled'}>Vendre</button> <button class="btn sm ghost" data-act="edit-service" data-id="${s.id}">Modifier</button></td></tr>`).join('')}</tbody></table></div>`).join('')||'<div class="card empty">Catalogue vide.</div>'}`}},
+
+/* ---------- Caisse ---------- */
+caisse:{title:()=>'Caisse',actions:()=>`<button class="btn" data-act="export-cash">${ico('dl')}<span class="lbl">Exporter</span></button><button class="btn" data-act="cash-new" data-type="recette">+ Recette</button><button class="btn primary" data-act="cash-new" data-type="depense">+ Dépense</button>`,html(){
+  const f=F.cash;if(!f.from){f.from=monthStart();f.to=today()}
+  const mv=movements(f.from,f.to);const inn=sum(mv.filter(m=>m.amount>0),m=>m.amount),out=-sum(mv.filter(m=>m.amount<0),m=>m.amount);
+  const byM={};for(const m of mv){byM[m.method]=(byM[m.method]||0)+m.amount}
+  return `<div class="toolbar"><label class="f" style="flex-direction:row;align-items:center">Du <input type="date" value="${f.from}" data-chg="cash-from"></label><label class="f" style="flex-direction:row;align-items:center">au <input type="date" value="${f.to}" data-chg="cash-to"></label>
+  <button class="btn sm" data-act="cash-range" data-r="jour">Aujourd’hui</button><button class="btn sm" data-act="cash-range" data-r="mois">Ce mois</button></div>
+  <div class="kpis">${kpi('Entrées',`<span class="amt-pos">${money(inn)}</span>`)}${kpi('Sorties',`<span class="amt-neg">${money(out)}</span>`)}${kpi('Solde de la période',money(inn-out))}${Object.entries(byM).map(([k,v])=>kpi(PAY[k]||k,money(v))).join('')}</div>
+  ${mv.length?`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Mode</th><th class="n">Entrée</th><th class="n">Sortie</th><th></th></tr></thead><tbody>${mv.map(m=>`<tr><td>${fDs(m.date)}</td><td>${esc(m.label)}</td><td>${esc(m.cat||'')}</td><td>${esc(PAY[m.method]||m.method||'')}</td><td class="n amt-pos">${m.amount>0?money(m.amount):''}</td><td class="n amt-neg">${m.amount<0?money(-m.amount):''}</td><td style="text-align:right">${m.bid?`<button class="btn sm ghost" data-act="open-booking" data-id="${m.bid}">Séjour</button>`:`<button class="btn sm ghost" data-act="cash-del" data-id="${m.cid}">Supprimer</button>`}</td></tr>`).join('')}</tbody><tfoot><tr><td colspan="4">Total</td><td class="n">${money(inn)}</td><td class="n">${money(out)}</td><td></td></tr></tfoot></table></div>`:'<div class="card empty">Aucun mouvement sur la période.</div>'}`}},
+
+/* ---------- Rapports ---------- */
+rapports:{title:()=>'Rapports',actions:()=>`<button class="btn" data-act="print-report">${ico('print')}<span class="lbl">Imprimer</span></button>`,html(){
+  const f=F.rep;if(!f.from){f.from=monthStart();f.to=today()}
+  return `<div class="toolbar"><label class="f" style="flex-direction:row;align-items:center">Du <input type="date" value="${f.from}" data-chg="rep-from"></label><label class="f" style="flex-direction:row;align-items:center">au <input type="date" value="${f.to}" data-chg="rep-to"></label>
+  <button class="btn sm" data-act="rep-range" data-r="mois">Ce mois</button><button class="btn sm" data-act="rep-range" data-r="moisprec">Mois précédent</button><button class="btn sm" data-act="rep-range" data-r="annee">Cette année</button></div>${reportHtml(f.from,f.to)}`}},
+
+/* ---------- Paramètres ---------- */
+parametres:{title:()=>'Paramètres',html(){const s=S.settings;
+  return `<form id="set-form" class="card" style="display:flex;flex-direction:column;gap:14px;max-width:820px">
+  <h2>Établissement</h2>
+  <div class="grid2"><label class="f">Nom<input name="name" value="${esc(s.name)}" required></label><label class="f">Type<select name="kind">${Object.entries(KINDS).map(([k,v])=>opt(k,v.label,s.kind)).join('')}</select></label>
+  <label class="f span2">Adresse<input name="address" value="${esc(s.address)}"></label>
+  <label class="f">Téléphone<input name="phone" value="${esc(s.phone)}"></label><label class="f">E-mail<input name="email" value="${esc(s.email)}"></label>
+  <label class="f">N° contribuable / RCCM<input name="taxId" value="${esc(s.taxId)}"></label><label class="f">Devise<input name="currency" value="${esc(s.currency)}"></label></div>
+  <h2>Tarification & séjours</h2>
+  <div class="grid2"><label class="f">Taxe de séjour (par adulte et par nuit)<input name="taxeSejour" type="number" min="0" step="any" value="${esc(s.taxeSejour)}"></label><label class="f">TVA incluse dans les prix (%)<input name="tva" type="number" min="0" step="any" value="${esc(s.tva)}"><span class="hint">Affichée pour information sur les factures. 0 = non applicable.</span></label>
+  <label class="f">Heure d’arrivée<input name="checkin" type="time" value="${esc(s.checkin)}"></label><label class="f">Heure de départ<input name="checkout" type="time" value="${esc(s.checkout)}"></label>
+  <label class="f span2">Message en bas des factures<input name="footer" value="${esc(s.footer)}"></label>
+  <label class="f">Apparence<select name="theme">${opt('','Automatique',s.theme)}${opt('light','Claire',s.theme)}${opt('dark','Sombre',s.theme)}</select></label></div>
+  <p class="hint" style="margin:0">Calcul automatique de l’hébergement : tarif mensuel à partir de 28 nuits, tarif hebdomadaire à partir de 7 nuits, sinon tarif nuitée (si le tarif correspondant est renseigné sur l’${esc(K().unit.toLowerCase())}).</p>
+  <div><button class="btn primary" type="submit">Enregistrer</button></div></form>
+  <div class="card" style="max-width:820px;margin-top:14px;display:flex;flex-direction:column;gap:10px"><h2>Sauvegarde des données</h2>
+  <p style="margin:0" class="dim">Les données sont enregistrées dans ce navigateur, sur cet appareil. Exportez régulièrement une sauvegarde pour ne rien perdre et pour transférer les données sur un autre appareil.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="backup">${ico('dl')} Exporter une sauvegarde</button><button class="btn" data-act="restore">Importer une sauvegarde</button><button class="btn danger" data-act="reset">Tout effacer</button></div></div>`},
+  after(){$('#set-form').addEventListener('submit',e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));if(!f.name.trim()){toast('Le nom est obligatoire','bad');return}
+    Object.assign(S.settings,{name:f.name.trim(),kind:f.kind,address:f.address,phone:f.phone,email:f.email,taxId:f.taxId,currency:f.currency.trim(),taxeSejour:num(f.taxeSejour),tva:num(f.tva),checkin:f.checkin,checkout:f.checkout,footer:f.footer,theme:f.theme});save();render();toast('Paramètres enregistrés')})}}
+};
+
+/* ---------- Tableaux filtrés ---------- */
+function resTable(){const f=F.res,t=today(),q=f.q.trim().toLowerCase();
+  let list=S.bookings.filter(b=>{if(f.st==='actives'&&!isActive(b))return false;if(f.st!=='actives'&&f.st!=='tous'&&b.status!==f.st)return false;if(f.when==='avenir'&&b.checkOut<t&&b.status!=='en_cours')return false;if(f.when==='passe'&&b.checkOut>=t)return false;
+    if(q){const g=guestOf(b.guestId),u=unitOf(b.unitId);const hay=[b.ref,gName(g),g?.phone,u?.name,b.source].join(' ').toLowerCase();if(!hay.includes(q))return false}return true});
+  list.sort((a,b)=>f.when==='passe'?b.checkIn.localeCompare(a.checkIn):a.checkIn.localeCompare(b.checkIn));
+  if(!list.length)return '<div class="card empty">Aucune réservation.</div>';
+  return `<div class="tbl-wrap"><table><thead><tr><th>Réf.</th><th>Client</th><th>${esc(K().unit)}</th><th>Arrivée</th><th>Départ</th><th class="n">Nuits</th><th>Statut</th><th>Source</th><th class="n">Total</th><th class="n">Reste dû</th></tr></thead><tbody>${list.map(b=>{const f2=folio(b);return `<tr class="click" data-act="open-booking" data-id="${b.id}"><td class="mono">${esc(b.ref)}</td><td><b>${esc(gName(guestOf(b.guestId)))}</b></td><td>${esc(unitOf(b.unitId)?.name||'—')}</td><td>${fD(b.checkIn)}</td><td>${fD(b.checkOut)}</td><td class="n">${f2.n}</td><td>${pill(BST[b.status])}</td><td>${esc(b.source||'')}</td><td class="n">${money(f2.total)}</td><td class="n ${f2.balance>0.5&&isActive(b)?'amt-neg':''}">${isActive(b)?money(f2.balance):'—'}</td></tr>`}).join('')}</tbody></table></div><p class="hint">${plural(list.length,'réservation')}</p>`}
+function cliTable(){const q=F.cli.q.trim().toLowerCase();
+  const list=S.guests.filter(g=>!q||[g.lastName,g.firstName,g.phone,g.email,g.idNumber,g.nationality].join(' ').toLowerCase().includes(q)).sort((a,b)=>gName(a).localeCompare(gName(b),'fr'));
+  if(!list.length)return '<div class="card empty">Aucun client.</div>';
+  return `<div class="tbl-wrap"><table><thead><tr><th>Nom</th><th>Téléphone</th><th>Nationalité</th><th>Pièce d’identité</th><th class="n">Séjours</th><th class="n">Nuits</th><th class="n">Dépensé</th><th>Dernier séjour</th></tr></thead><tbody>${list.map(g=>{const bs=S.bookings.filter(b=>b.guestId===g.id&&isActive(b));const last=bs.map(b=>b.checkIn).sort().pop();return `<tr class="click" data-act="open-guest" data-id="${g.id}"><td><b>${esc(gName(g))}</b></td><td>${esc(g.phone||'')}</td><td>${esc(g.nationality||'')}</td><td>${g.idNumber?esc((g.idType||'')+' '+g.idNumber):'<span class="pill warn">Manquante</span>'}</td><td class="n">${bs.length}</td><td class="n">${sum(bs,nights)}</td><td class="n">${money(sum(bs,b=>folio(b).total))}</td><td>${fD(last)}</td></tr>`}).join('')}</tbody></table></div><p class="hint">${plural(list.length,'client')}</p>`}
+
+/* ---------- Rapport ---------- */
+function report(from,to){
+  const toX=addDays(to,1),days=diff(from,toX);const svc=S.units.filter(u=>!u.outOfOrder);const avail=svc.length*days;
+  let sold=0,lodg=0,tax=0,guestsN=0;const bySrc={},byType={},byCat={};
+  for(const u of svc){const k=u.type||'—';(byType[k]=byType[k]||{units:0,sold:0,rev:0}).units++}
+  for(const b of S.bookings){if(!isActive(b))continue;const s=b.checkIn>from?b.checkIn:from,e=b.checkOut<toX?b.checkOut:toX;const ov=diff(s,e);
+    if(ov>0){const n=nights(b);const rev=n?num(b.rate)*ov/n:0;sold+=ov;lodg+=rev;tax+=num(S.settings.taxeSejour)*num(b.adults)*ov;
+      const src=b.source||'—';const x=(bySrc[src]=bySrc[src]||{n:0,nights:0,rev:0});x.n++;x.nights+=ov;x.rev+=rev;
+      const ty=unitOf(b.unitId)?.type||'—';const y=(byType[ty]=byType[ty]||{units:0,sold:0,rev:0});y.sold+=ov;y.rev+=rev;
+      if(b.checkIn>=from&&b.checkIn<=to)guestsN+=num(b.adults)+num(b.children)}
+    for(const c of b.charges||[])if(c.date>=from&&c.date<=to)byCat[c.category]=(byCat[c.category]||0)+num(c.qty)*num(c.price)}
+  for(const c of S.cash)if(c.type==='recette'&&c.serviceCat&&c.date>=from&&c.date<=to)byCat[c.serviceCat]=(byCat[c.serviceCat]||0)+num(c.amount);
+  const mv=movements(from,to);const inn=sum(mv.filter(m=>m.amount>0),m=>m.amount),out=-sum(mv.filter(m=>m.amount<0),m=>m.amount);
+  const byExp={};for(const c of S.cash)if(c.type==='depense'&&c.date>=from&&c.date<=to)byExp[c.category]=(byExp[c.category]||0)+num(c.amount);
+  const services=sum(Object.values(byCat),v=>v);
+  return{days,avail,sold,lodg,tax,services,occ:avail?sold*100/avail:0,adr:sold?lodg/sold:0,revpar:avail?lodg/avail:0,guestsN,bySrc,byType,byCat,byExp,inn,out}}
+function reportHtml(from,to){if(!validDate(from)||!validDate(to)||to<from)return '<div class="card empty">Période invalide.</div>';const r=report(from,to);
+  const tbl=(title,heads,rows,foot)=>`<section class="tbl-wrap"><table><thead><tr>${heads.map((h,i)=>`<th${i?' class="n"':''}>${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map((c,i)=>`<td${i?' class="n"':''}>${c}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${heads.length}" class="empty">Aucune donnée</td></tr>`}</tbody>${foot?`<tfoot><tr>${foot.map((c,i)=>`<td${i?' class="n"':''}>${c}</td>`).join('')}</tr></tfoot>`:''}</table></section>`;
+  return `<div class="kpis">${kpi('Taux d’occupation',r.occ.toFixed(1).replace('.',',')+' %',`${fmtN(r.sold)} nuitées vendues / ${fmtN(r.avail)} disponibles`)}${kpi('Prix moyen par nuit',money(r.adr),'ADR')}${kpi('Revenu par unité disponible',money(r.revpar),'RevPAR')}${kpi('Clients arrivés',fmtN(r.guestsN),'adultes et enfants')}</div>
+  <div class="kpis">${kpi('CA hébergement',money(r.lodg))}${kpi('CA services',money(r.services))}${kpi('Taxe de séjour collectée',money(r.tax))}${kpi('Chiffre d’affaires total',money(r.lodg+r.services+r.tax))}</div>
+  <div class="kpis">${kpi('Encaissements',`<span class="amt-pos">${money(r.inn)}</span>`)}${kpi('Dépenses',`<span class="amt-neg">${money(r.out)}</span>`)}${kpi('Résultat de caisse',money(r.inn-r.out))}</div>
+  <div class="cols2">
+  ${tbl('Par type',['Type d’hébergement','Unités','Nuitées','Occupation','CA'],Object.entries(r.byType).map(([k,v])=>[esc(k),v.units,fmtN(v.sold),v.units?(v.sold*100/(v.units*r.days)).toFixed(0)+' %':'—',money(v.rev)]))}
+  ${tbl('Par source',['Source des réservations','Séjours','Nuitées','CA hébergement'],Object.entries(r.bySrc).sort((a,b)=>b[1].rev-a[1].rev).map(([k,v])=>[esc(k),v.n,fmtN(v.nights),money(v.rev)]))}
+  ${tbl('Services',['Services vendus','Montant'],Object.entries(r.byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[esc(CATS[k]||k),money(v)]),['Total',money(r.services)])}
+  ${tbl('Dépenses',['Dépenses par catégorie','Montant'],Object.entries(r.byExp).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[esc(k),money(v)]),['Total',money(r.out)])}
+  </div>`}
+
+/* ============ Formulaires ============ */
+function bookingForm(b,pre){
+  pre=pre||{};const isNew=!b;const t=today();
+  b=b||{guestId:pre.guestId||'',unitId:pre.unit||'',checkIn:pre.date||t,checkOut:addDays(pre.date||t,1),adults:1,children:0,status:'confirmee',source:'Comptoir',rate:'',manualRate:false,notes:''};
+  const guests=[...S.guests].sort((a,c)=>gName(a).localeCompare(gName(c),'fr'));
+  openDlg({title:isNew?'Nouvelle réservation':'Modifier la réservation '+b.ref,wide:true,submitLabel:isNew?'Créer la réservation':'Enregistrer',body:`
+  <fieldset><legend>Client</legend><div class="grid2"><label class="f span2">Client<select name="guestId" id="bf-guest">${opt('new','➕ Nouveau client',b.guestId||'new')}${guests.map(g=>opt(g.id,gName(g)+(g.phone?' · '+g.phone:''),b.guestId)).join('')}</select></label></div>
+  <div class="grid3" id="bf-newguest" style="margin-top:10px"><label class="f">Nom<input name="g_lastName"></label><label class="f">Prénom<input name="g_firstName"></label><label class="f">Téléphone<input name="g_phone" type="tel"></label></div></fieldset>
+  <fieldset><legend>Séjour</legend><div class="grid4">
+  <label class="f span2">${esc(K().unit)}<select name="unitId" id="bf-unit" required>${opt('','— Choisir —',b.unitId)}${unitsSorted().map(u=>opt(u.id,u.name+' · '+u.type+' · '+money(u.rateNight)+'/nuit'+(u.outOfOrder?' (hors service)':''),b.unitId)).join('')}</select></label>
+  <label class="f">Arrivée<input type="date" name="checkIn" id="bf-in" value="${b.checkIn}" required></label><label class="f">Départ<input type="date" name="checkOut" id="bf-out" value="${b.checkOut}" required></label>
+  <label class="f">Adultes<input type="number" name="adults" min="1" value="${esc(b.adults)}"></label><label class="f">Enfants<input type="number" name="children" min="0" value="${esc(b.children)}"></label>
+  <label class="f">Statut<select name="status">${['option','confirmee'].concat(isNew?[]:['en_cours','terminee']).map(k=>opt(k,BST[k][0],b.status)).join('')}</select></label>
+  <label class="f">Source<select name="source">${optsArr(SOURCES,b.source)}</select></label></div></fieldset>
+  <fieldset><legend>Tarif</legend><div class="grid2"><label class="f">Montant de l’hébergement (${esc(S.settings.currency)})<input type="number" name="rate" id="bf-rate" min="0" step="any" value="${esc(b.rate)}"><span class="hint" id="bf-hint"></span></label>
+  <div style="display:flex;flex-direction:column;gap:6px;justify-content:center"><label class="chk"><input type="checkbox" name="manualRate" id="bf-manual"${b.manualRate?' checked':''}> Tarif négocié (ne pas recalculer)</label><span class="hint">Acompte : à saisir après création, dans la fiche de la réservation.</span></div></div></fieldset>
+  <label class="f">Notes (demandes particulières, heure d’arrivée…)<textarea name="notes">${esc(b.notes)}</textarea></label>`,
+  onSubmit(f){
+    if(!f.unitId)return 'Choisissez un '+K().unit.toLowerCase()+'.';
+    if(!validDate(f.checkIn)||!validDate(f.checkOut))return 'Dates invalides.';
+    if(f.checkOut<=f.checkIn)return 'La date de départ doit être après la date d’arrivée.';
+    let gid=f.guestId;
+    if(gid==='new'){if(!f.g_lastName.trim()&&!f.g_firstName.trim())return 'Indiquez au moins le nom du nouveau client.'}
+    const u=unitOf(f.unitId);
+    const draft={id:b.id,unitId:f.unitId,checkIn:f.checkIn,checkOut:f.checkOut};
+    const c=conflict(draft);if(c)return `${u.name} est déjà occupé(e) du ${fD(c.checkIn)} au ${fD(c.checkOut)} (${gName(guestOf(c.guestId))}, ${c.ref}).`;
+    if(num(f.adults)+num(f.children)>(num(u.capacity)||99)&&!confirm(`${u.name} est prévu(e) pour ${u.capacity} personne(s). Continuer quand même ?`))return false;
+    if(gid==='new'){const g={id:uid(),lastName:f.g_lastName.trim(),firstName:f.g_firstName.trim(),phone:f.g_phone.trim(),email:'',nationality:'',idType:'CNI',idNumber:'',birthDate:'',address:'',notes:'',createdAt:today()};S.guests.push(g);gid=g.id}
+    const manual=!!f.manualRate;const rate=f.rate===''?autoRate(u,diff(f.checkIn,f.checkOut)):num(f.rate);
+    const tgt=isNew?{id:uid(),ref:nextRef(),charges:[],payments:[],createdAt:today()}:b;
+    Object.assign(tgt,{guestId:gid,unitId:f.unitId,checkIn:f.checkIn,checkOut:f.checkOut,adults:Math.max(1,num(f.adults)),children:Math.max(0,num(f.children)),status:f.status,source:f.source,rate,manualRate:manual,notes:f.notes});
+    if(isNew)S.bookings.push(tgt);
+    save();toast(isNew?'Réservation '+tgt.ref+' créée':'Réservation modifiée');render();openBooking(tgt.id);return false}});
+  const upd=()=>{const g=$('#bf-guest').value;$('#bf-newguest').style.display=g==='new'?'':'none';
+    const u=unitOf($('#bf-unit').value),i=$('#bf-in').value,o=$('#bf-out').value;const n=validDate(i)&&validDate(o)?diff(i,o):0;
+    if(!$('#bf-manual').checked&&u&&n>0)$('#bf-rate').value=autoRate(u,n);
+    $('#bf-hint').textContent=n>0?plural(n,'nuit')+(u?' · '+rateBasis(u,n):''):'Dates à vérifier';};
+  $('#dlg-body').oninput=e=>{if(e.target.id==='bf-rate')$('#bf-manual').checked=true;if(e.target.id==='bf-in'){const i=$('#bf-in').value,o=$('#bf-out');if(validDate(i)&&(!validDate(o.value)||o.value<=i))o.value=addDays(i,1)}if(e.target.id!=='bf-rate')upd()};
+  $('#dlg-body').onchange=$('#dlg-body').oninput;
+  const keepRate=b.rate!==''&&!isNew;if(keepRate){const m=$('#bf-manual').checked;$('#bf-manual').checked=true;upd();$('#bf-manual').checked=m}else upd();
+}
+
+function openBooking(id){
+  const b=bk(id);if(!b){closeDlg();return}
+  const g=guestOf(b.guestId),u=unitOf(b.unitId),f=folio(b),t=today();
+  const svcOpts=Object.keys(CATS).map(k=>{const l=S.services.filter(s=>s.active&&s.category===k);return l.length?`<optgroup label="${esc(CATS[k])}">${l.map(s=>opt(s.id,s.name+' · '+money(s.price))).join('')}</optgroup>`:''}).join('');
+  const st=b.status,act=isActive(b);
+  openDlg({title:`Réservation ${b.ref}`,wide:true,body:`
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${pill(BST[st])}${b.invoiceNo?`<span class="pill accent">Facture ${esc(b.invoiceNo)}</span>`:''}<span class="dim small">Créée le ${fD(b.createdAt)} · ${esc(b.source||'')}</span></div>
+  <div class="info-grid">
+    <div><span>Client</span><button type="button" class="btn sm ghost" style="padding:0;height:auto" data-act="open-guest" data-id="${b.guestId}"><b>${esc(gName(g))}</b></button><div class="small dim">${esc(g?.phone||'')}</div></div>
+    <div><span>${esc(K().unit)}</span><b>${esc(u?.name||'—')}</b><div class="small dim">${esc(u?.type||'')}</div></div>
+    <div><span>Séjour</span>${fDs(b.checkIn)} → ${fDs(b.checkOut)}<div class="small dim">${plural(f.n,'nuit')} · ${plural(num(b.adults),'adulte')}${num(b.children)?', '+plural(num(b.children),'enfant'):''}</div></div>
+    <div><span>${f.balance<-0.5?'Trop-perçu à rembourser':'Reste dû'}</span><b class="${f.balance>0.5?'amt-neg':f.balance<-0.5?'amt-neg':'amt-pos'}" style="font-size:18px">${money(Math.abs(f.balance))}</b><div class="small dim">sur ${money(f.total)}</div></div>
+  </div>
+  ${b.notes?`<div class="small" style="background:var(--surface-2);padding:8px 12px;border-radius:8px">📝 ${esc(b.notes)}</div>`:''}
+  ${g&&!g.idNumber?`<div class="small" style="background:var(--warn-soft);color:var(--warn);padding:8px 12px;border-radius:8px;font-weight:600">Pièce d’identité non renseignée : complétez la fiche client pour la fiche de police.</div>`:''}
+  <h3 class="sec-t">Note du client (folio)</h3>
+  <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Libellé</th><th class="n">Qté</th><th class="n">P.U.</th><th class="n">Montant</th><th></th></tr></thead><tbody>
+    <tr><td>${fDs(b.checkIn)}</td><td>Hébergement · ${esc(u?.name||'')} · ${plural(f.n,'nuit')}${b.manualRate?' <span class="pill muted">négocié</span>':''}</td><td class="n">${f.n}</td><td class="n">${money(f.n?f.lodging/f.n:0)}</td><td class="n">${money(f.lodging)}</td><td></td></tr>
+    ${f.tax?`<tr><td></td><td>Taxe de séjour</td><td class="n">${num(b.adults)*f.n}</td><td class="n">${money(S.settings.taxeSejour)}</td><td class="n">${money(f.tax)}</td><td></td></tr>`:''}
+    ${(b.charges||[]).map(c=>`<tr><td>${fDs(c.date)}</td><td>${esc(c.label)} <span class="dim small">${esc(CATS[c.category]||'')}</span></td><td class="n">${fmtN(c.qty)}</td><td class="n">${money(c.price)}</td><td class="n">${money(num(c.qty)*num(c.price))}</td><td style="text-align:right"><button type="button" class="btn sm ghost" data-act="del-charge" data-id="${b.id}|${c.id}" aria-label="Supprimer">✕</button></td></tr>`).join('')}
+  </tbody><tfoot><tr><td colspan="4">Total</td><td class="n">${money(f.total)}</td><td></td></tr></tfoot></table></div>
+  ${act?`<div class="addrow"><label class="f">Service<select id="ch-svc"><option value="">— Libre —</option>${svcOpts}</select></label><label class="f">Libellé<input id="ch-label"></label><label class="f">Qté<input id="ch-qty" type="number" min="0" step="any" value="1"></label><label class="f">Prix unitaire<input id="ch-price" type="number" step="any"></label><label class="f">Date<input id="ch-date" type="date" value="${t<b.checkIn?b.checkIn:t}"></label><button type="button" class="btn" data-act="add-charge" data-id="${b.id}">Ajouter</button></div>`:''}
+  <h3 class="sec-t">Paiements</h3>
+  ${(b.payments||[]).length?`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Mode</th><th>Note</th><th class="n">Montant</th><th></th></tr></thead><tbody>${b.payments.map(p=>`<tr><td>${fD(p.date)}</td><td>${esc(PAY[p.method]||p.method)}</td><td>${esc(p.note||'')}</td><td class="n">${money(p.amount)}</td><td style="text-align:right"><button type="button" class="btn sm ghost" data-act="del-pay" data-id="${b.id}|${p.id}" aria-label="Supprimer">✕</button></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="3">Total payé</td><td class="n">${money(f.paid)}</td><td></td></tr></tfoot></table></div>`:'<div class="dim small">Aucun paiement enregistré.</div>'}
+  ${f.balance<-0.5?`<div class="small" style="background:var(--warn-soft);color:var(--warn);padding:8px 12px;border-radius:8px;font-weight:600">Le client a payé ${money(-f.balance)} de trop (départ anticipé, remise…). Pour enregistrer le remboursement, saisissez un montant négatif.</div>`:''}
+  <div class="addrow pay"><label class="f">Montant<input id="pay-amt" type="number" step="any" value="${f.balance>0.5||f.balance<-0.5?Math.round(f.balance):''}"></label><label class="f">Mode<select id="pay-method">${opts(PAY,'especes')}</select></label><label class="f">Date<input id="pay-date" type="date" value="${t}"></label><label class="f">Note<input id="pay-note" placeholder="Acompte, référence Mobile Money…"></label><button type="button" class="btn good" data-act="add-pay" data-id="${b.id}">Encaisser</button></div>`,
+  foot:`${['option','confirmee'].includes(st)?`<button type="button" class="btn good" data-act="checkin" data-id="${b.id}">Arrivée</button>`:''}${st==='en_cours'?`<button type="button" class="btn primary" data-act="checkout" data-id="${b.id}">Départ</button>`:''}
+    ${st==='option'?`<button type="button" class="btn" data-act="confirm-booking" data-id="${b.id}">Confirmer</button>`:''}
+    <button type="button" class="btn" data-act="edit-booking" data-id="${b.id}">Modifier</button>
+    <button type="button" class="btn" data-act="print-invoice" data-id="${b.id}">${ico('print')} Facture</button><button type="button" class="btn" data-act="print-police" data-id="${b.id}">Fiche de police</button>
+    <span class="sp"></span>
+    ${['option','confirmee'].includes(st)?`<button type="button" class="btn danger" data-act="noshow" data-id="${b.id}">Non présenté</button><button type="button" class="btn danger" data-act="cancel-booking" data-id="${b.id}">Annuler</button>`:''}
+    ${!act?`<button type="button" class="btn" data-act="restore-booking" data-id="${b.id}">Rétablir</button><button type="button" class="btn danger" data-act="del-booking" data-id="${b.id}">Supprimer</button>`:''}`});
+}
+
+function guestForm(g){const isNew=!g;g=g||{lastName:'',firstName:'',phone:'',email:'',nationality:'',idType:'CNI',idNumber:'',birthDate:'',birthPlace:'',profession:'',address:'',notes:''};
+  const hist=isNew?[]:S.bookings.filter(b=>b.guestId===g.id).sort((a,b)=>b.checkIn.localeCompare(a.checkIn));
+  openDlg({title:isNew?'Nouveau client':gName(g),wide:!isNew,body:`<div class="grid2">
+  <label class="f">Nom<input name="lastName" value="${esc(g.lastName)}" required></label><label class="f">Prénom(s)<input name="firstName" value="${esc(g.firstName)}"></label>
+  <label class="f">Téléphone<input name="phone" type="tel" value="${esc(g.phone)}"></label><label class="f">E-mail<input name="email" type="email" value="${esc(g.email)}"></label>
+  <label class="f">Date de naissance<input name="birthDate" type="date" value="${esc(g.birthDate)}"></label><label class="f">Lieu de naissance<input name="birthPlace" value="${esc(g.birthPlace||'')}"></label>
+  <label class="f">Nationalité<input name="nationality" value="${esc(g.nationality)}"></label><label class="f">Profession<input name="profession" value="${esc(g.profession||'')}"></label>
+  <label class="f">Pièce d’identité<select name="idType">${optsArr(ID_TYPES,g.idType)}</select></label><label class="f">Numéro de la pièce<input name="idNumber" value="${esc(g.idNumber)}"></label>
+  <label class="f span2">Adresse<input name="address" value="${esc(g.address)}"></label>
+  <label class="f span2">Notes (préférences, allergies, entreprise…)<textarea name="notes">${esc(g.notes)}</textarea></label></div>
+  ${isNew?'':`<h3 class="sec-t">Historique des séjours (${hist.length})</h3>${hist.length?`<div class="tbl-wrap"><table><tbody>${hist.map(b=>{const f=folio(b);return `<tr class="click" data-act="open-booking" data-id="${b.id}"><td class="mono">${esc(b.ref)}</td><td>${fD(b.checkIn)} → ${fD(b.checkOut)}</td><td>${esc(unitOf(b.unitId)?.name||'')}</td><td>${pill(BST[b.status])}</td><td class="n">${money(f.total)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="dim small">Aucun séjour.</div>'}`}`,
+  foot:`${isNew?'':`<button type="button" class="btn" data-act="new-booking" data-guest="${g.id}">Nouvelle réservation</button><button type="button" class="btn danger" data-act="del-guest" data-id="${g.id}">Supprimer</button>`}<span class="sp"></span><button type="button" class="btn ghost" data-act="close">Fermer</button><button class="btn primary" type="submit">Enregistrer</button>`,
+  onSubmit(f){if(!f.lastName.trim())return 'Le nom est obligatoire.';const tgt=isNew?{id:uid(),createdAt:today()}:g;Object.assign(tgt,{lastName:f.lastName.trim(),firstName:f.firstName.trim(),phone:f.phone.trim(),email:f.email.trim(),birthDate:f.birthDate,birthPlace:f.birthPlace,nationality:f.nationality,profession:f.profession,idType:f.idType,idNumber:f.idNumber.trim(),address:f.address,notes:f.notes});if(isNew)S.guests.push(tgt);toast('Client enregistré')}});
+}
+
+function unitForm(u){const isNew=!u;u=u||{name:'',type:K().types[0],capacity:2,floor:'',rateNight:'',rateWeek:'',rateMonth:'',outOfOrder:false,notes:''};
+  const types=[...new Set([...K().types,...S.units.map(x=>x.type).filter(Boolean)])];
+  openDlg({title:isNew?'Ajouter : '+K().unit.toLowerCase():'Modifier '+u.name,body:`<div class="grid2">
+  <label class="f">Nom / numéro<input name="name" value="${esc(u.name)}" required placeholder="Ex. 101, Studio A, Dortoir · lit 3"></label>
+  <label class="f">Type<input name="type" list="types-dl" value="${esc(u.type)}"><datalist id="types-dl">${types.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>
+  <label class="f">Capacité (personnes)<input name="capacity" type="number" min="1" value="${esc(u.capacity)}"></label><label class="f">Étage / bâtiment<input name="floor" value="${esc(u.floor)}"></label>
+  <label class="f">Tarif nuitée<input name="rateNight" type="number" min="0" step="any" value="${esc(u.rateNight)}" required></label>
+  <label class="f">Tarif semaine <span class="hint">(facultatif)</span><input name="rateWeek" type="number" min="0" step="any" value="${esc(u.rateWeek)}"></label>
+  <label class="f">Tarif mois <span class="hint">(facultatif)</span><input name="rateMonth" type="number" min="0" step="any" value="${esc(u.rateMonth)}"></label>
+  <label class="chk" style="align-self:end"><input type="checkbox" name="outOfOrder"${u.outOfOrder?' checked':''}> Hors service</label>
+  <label class="f span2">Équipements / notes<textarea name="notes" placeholder="Climatisation, TV, cuisine équipée, balcon…">${esc(u.notes)}</textarea></label></div>
+  ${isNew?`<label class="chk"><input type="checkbox" name="multi"> Créer plusieurs à la suite (ex. lits d’un dortoir)<input name="count" type="number" min="2" max="50" value="4" style="width:80px"></label>`:''}`,
+  foot:`${isNew?'':`<button type="button" class="btn danger" data-act="del-unit" data-id="${u.id}">Supprimer</button>`}<span class="sp"></span><button type="button" class="btn ghost" data-act="close">Annuler</button><button class="btn primary" type="submit">Enregistrer</button>`,
+  onSubmit(f){if(!f.name.trim())return 'Le nom est obligatoire.';
+    const data={type:f.type.trim()||'—',capacity:Math.max(1,num(f.capacity)),floor:f.floor,rateNight:num(f.rateNight),rateWeek:num(f.rateWeek),rateMonth:num(f.rateMonth),outOfOrder:!!f.outOfOrder,notes:f.notes};
+    if(isNew){const n=f.multi?Math.min(50,Math.max(2,num(f.count))):1;for(let i=1;i<=n;i++)S.units.push({id:uid(),name:n>1?f.name.trim()+' '+i:f.name.trim(),hk:'propre',...data});toast(n>1?n+' ajoutés':'Ajouté')}
+    else{Object.assign(u,{name:f.name.trim(),...data});toast('Modifié')}}});
+}
+
+function serviceForm(s){const isNew=!s;s=s||{name:'',category:'restaurant',price:'',active:true};
+  openDlg({title:isNew?'Nouveau service / produit':'Modifier '+s.name,body:`<div class="grid2"><label class="f span2">Nom<input name="name" value="${esc(s.name)}" required></label><label class="f">Catégorie<select name="category">${opts(CATS,s.category)}</select></label><label class="f">Prix (${esc(S.settings.currency)})<input name="price" type="number" min="0" step="any" value="${esc(s.price)}"></label><label class="chk"><input type="checkbox" name="active"${s.active?' checked':''}> Actif (proposé à la vente)</label></div>`,
+  onSubmit(f){if(!f.name.trim())return 'Le nom est obligatoire.';const tgt=isNew?{id:uid()}:s;Object.assign(tgt,{name:f.name.trim(),category:f.category,price:num(f.price),active:!!f.active});if(isNew)S.services.push(tgt)}});
+}
+
+function saleForm(sid){const inh=S.bookings.filter(b=>b.status==='en_cours').sort((a,b)=>(unitOf(a.unitId)?.name||'').localeCompare(unitOf(b.unitId)?.name||'','fr',{numeric:true}));
+  const act=S.services.filter(s=>s.active);if(!act.length){toast('Ajoutez d’abord des services au catalogue','warn');return}
+  openDlg({title:'Vente / consommation',submitLabel:'Valider',body:`<div class="grid2"><label class="f span2">Article<select name="sid" id="sale-svc">${Object.keys(CATS).map(k=>{const l=act.filter(s=>s.category===k);return l.length?`<optgroup label="${esc(CATS[k])}">${l.map(s=>opt(s.id,s.name+' · '+money(s.price),sid)).join('')}</optgroup>`:''}).join('')}</select></label>
+  <label class="f">Quantité<input name="qty" type="number" min="0" step="any" value="1"></label><label class="f">Prix unitaire<input name="price" id="sale-price" type="number" min="0" step="any"></label>
+  <label class="f span2">Règlement<select name="to" id="sale-to">${opt('direct','Encaissement immédiat (client de passage)','direct')}${inh.length?`<optgroup label="Porter sur la note d’un client en séjour">${inh.map(b=>opt(b.id,(unitOf(b.unitId)?.name||'')+' · '+gName(guestOf(b.guestId)))).join('')}</optgroup>`:''}</select></label>
+  <label class="f" id="sale-m">Mode de paiement<select name="method">${opts(PAY,'especes')}</select></label></div>`,
+  onSubmit(f){const s=S.services.find(x=>x.id===f.sid);const qty=num(f.qty),price=f.price===''?num(s.price):num(f.price);if(qty<=0)return 'Quantité invalide.';
+    if(f.to==='direct'){S.cash.push({id:uid(),date:today(),type:'recette',category:CATS[s.category]||'Autre',serviceCat:s.category,label:s.name+' × '+fmtN(qty),amount:qty*price,method:f.method});toast('Vente encaissée : '+money(qty*price))}
+    else{const b=bk(f.to);b.charges.push({id:uid(),date:today(),serviceId:s.id,label:s.name,category:s.category,qty,price});toast('Porté sur la note '+b.ref)}}});
+  const upd=()=>{const s=S.services.find(x=>x.id===$('#sale-svc').value);$('#sale-price').value=s?s.price:'';};upd();
+  $('#sale-svc').onchange=upd;const m=()=>{$('#sale-m').style.display=$('#sale-to').value==='direct'?'':'none'};$('#sale-to').onchange=m;m();
+}
+
+function taskForm(x){const isNew=!x;x=x||{unitId:'',kind:'menage',title:'',priority:'normale',status:'ouvert',assignee:'',notes:''};
+  openDlg({title:isNew?'Nouvelle tâche':'Modifier la tâche',body:`<div class="grid2"><label class="f">${esc(K().unit)}<select name="unitId" required>${opt('','— Choisir —',x.unitId)}${unitsSorted().map(u=>opt(u.id,u.name,x.unitId)).join('')}</select></label>
+  <label class="f">Type<select name="kind">${opt('menage','Ménage',x.kind)}${opt('maintenance','Maintenance',x.kind)}</select></label>
+  <label class="f span2">Description<input name="title" value="${esc(x.title)}" required placeholder="Ex. Fuite robinet, ménage complet, changement draps…"></label>
+  <label class="f">Priorité<select name="priority">${opts(PRIO,x.priority)}</select></label><label class="f">Assignée à<input name="assignee" value="${esc(x.assignee)}"></label>
+  <label class="f">Statut<select name="status">${opts(TST,x.status)}</select></label>
+  ${isNew?`<label class="chk" style="align-self:end"><input type="checkbox" name="ooo"> Mettre hors service</label>`:''}</div>`,
+  foot:`${isNew?'':`<button type="button" class="btn danger" data-act="del-task" data-id="${x.id}">Supprimer</button>`}<span class="sp"></span><button type="button" class="btn ghost" data-act="close">Annuler</button><button class="btn primary" type="submit">Enregistrer</button>`,
+  onSubmit(f){if(!f.unitId)return 'Choisissez un '+K().unit.toLowerCase()+'.';if(!f.title.trim())return 'Décrivez la tâche.';
+    const tgt=isNew?{id:uid(),createdAt:today(),doneAt:''}:x;const was=tgt.status;Object.assign(tgt,{unitId:f.unitId,kind:f.kind,title:f.title.trim(),priority:f.priority,status:f.status,assignee:f.assignee});
+    if(isNew){S.tasks.push(tgt);const u=unitOf(f.unitId);if(f.ooo&&u)u.outOfOrder=true;if(f.kind==='menage'&&u&&u.hk==='propre')u.hk='sale'}
+    taskDone(tgt,was)}});
+}
+function taskDone(x,was){if(x.status==='fait'&&was!=='fait'){x.doneAt=today();const u=unitOf(x.unitId);if(u&&x.kind==='menage'){u.hk='propre'}
+  if(u&&x.kind==='maintenance'&&u.outOfOrder&&!S.tasks.some(o=>o!==x&&o.unitId===u.id&&o.kind==='maintenance'&&o.status!=='fait')&&confirm(u.name+' : remettre en service ?'))u.outOfOrder=false}}
+
+function cashForm(type){openDlg({title:type==='depense'?'Nouvelle dépense':'Nouvelle recette',body:`<div class="grid2"><label class="f span2">Libellé<input name="label" required></label>
+  <label class="f">Catégorie${type==='depense'?`<select name="category">${optsArr(EXP_CATS)}</select>`:`<select name="category">${optsArr(['Recette diverse','Location de salle','Commission','Apport','Autre'])}</select>`}</label>
+  <label class="f">Montant<input name="amount" type="number" min="0" step="any" required></label><label class="f">Mode<select name="method">${opts(PAY,'especes')}</select></label><label class="f">Date<input name="date" type="date" value="${today()}"></label></div>`,
+  onSubmit(f){if(!f.label.trim())return 'Le libellé est obligatoire.';if(num(f.amount)<=0)return 'Montant invalide.';if(!validDate(f.date))return 'Date invalide.';S.cash.push({id:uid(),date:f.date,type,category:f.category,label:f.label.trim(),amount:num(f.amount),method:f.method});toast('Enregistré')}})}
+
+/* ============ Actions sur les séjours ============ */
+function checkin(id){const b=bk(id),t=today();const u=unitOf(b.unitId);
+  if(b.checkIn>t){if(!confirm(`Arrivée anticipée (prévue le ${fD(b.checkIn)}). Avancer la date d’arrivée à aujourd’hui ?`))return;const d={id:b.id,unitId:b.unitId,checkIn:t,checkOut:b.checkOut};const c=conflict(d);if(c){toast(`${u?.name} est occupé(e) jusqu’au ${fD(c.checkOut)}.`,'bad');return}b.checkIn=t;if(!b.manualRate)b.rate=autoRate(u,nights(b))}
+  if(u&&u.outOfOrder&&!confirm(u.name+' est hors service. Continuer ?'))return;
+  if(u&&u.hk!=='propre'&&!confirm(`${u.name} est marqué(e) « ${HK[u.hk][0]} ». Faire l’arrivée quand même ?`))return;
+  b.status='en_cours';b.checkedInAt=new Date().toISOString();save();
+  const g=guestOf(b.guestId);toast('Arrivée enregistrée : '+gName(g));if(g&&!g.idNumber)setTimeout(()=>toast('Pensez à compléter la pièce d’identité (fiche de police).','warn'),400);
+  render();if($('#dlg').open)openBooking(id)}
+function checkout(id){const b=bk(id),t=today();const u=unitOf(b.unitId);
+  if(b.checkOut>t){if(!confirm('Départ anticipé : la date de départ sera ramenée à aujourd’hui'+(b.manualRate?'':' et l’hébergement recalculé')+'. Continuer ?'))return;b.checkOut=t>b.checkIn?t:addDays(b.checkIn,1);if(!b.manualRate)b.rate=autoRate(u,nights(b))}
+  else if(b.checkOut<t){if(confirm(`Le départ était prévu le ${fD(b.checkOut)}. Prolonger le séjour jusqu’à aujourd’hui (nuits supplémentaires facturées) ?`)){const d={id:b.id,unitId:b.unitId,checkIn:b.checkIn,checkOut:t};const c=conflict(d);if(c){toast('Impossible de prolonger : '+(u?.name||'')+' est réservé(e) ensuite.','bad')}else{b.checkOut=t;if(!b.manualRate)b.rate=autoRate(u,nights(b));else toast('Tarif négocié : pensez à ajuster le montant de l’hébergement.','warn')}}}
+  const f=folio(b);if(f.balance>0.5&&!confirm(`Solde restant dû : ${money(f.balance)}.\nValider le départ quand même ?`)){save();render();openBooking(id);return}
+  b.status='terminee';b.checkedOutAt=new Date().toISOString();assignInvoice(b);
+  if(u){u.hk='sale';S.tasks.push({id:uid(),unitId:u.id,kind:'menage',title:'Ménage de départ',priority:'normale',status:'ouvert',assignee:'',createdAt:t,doneAt:''})}
+  save();toast('Départ enregistré · facture '+b.invoiceNo);render();if($('#dlg').open)openBooking(id)}
+
+/* ============ Impression ============ */
+function docHead(title,sub){const s=S.settings;return `<div class="hd"><div><h1>${esc(s.name)}</h1><div>${esc(s.address)}</div><div>${[s.phone,s.email].filter(Boolean).map(esc).join(' · ')}</div>${s.taxId?`<div>N° contribuable : ${esc(s.taxId)}</div>`:''}</div><div style="text-align:right"><h1>${esc(title)}</h1>${sub||''}</div></div>`}
+function printDoc(html){$('#print-area').innerHTML=`<div class="doc">${html}</div>`;setTimeout(()=>window.print(),50)}
+function printInvoice(id){const b=bk(id);assignInvoice(b);save();const g=guestOf(b.guestId),u=unitOf(b.unitId),f=folio(b),s=S.settings;
+  const rows=[[fD(b.checkIn),`Hébergement · ${u?.name||''} (${u?.type||''}) du ${fD(b.checkIn)} au ${fD(b.checkOut)}`,f.n,f.n?f.lodging/f.n:0,f.lodging]];
+  if(f.tax)rows.push(['','Taxe de séjour',num(b.adults)*f.n,num(s.taxeSejour),f.tax]);
+  for(const c of b.charges||[])rows.push([fD(c.date),c.label,c.qty,c.price,num(c.qty)*num(c.price)]);
+  const tva=num(s.tva)?f.total-f.total/(1+num(s.tva)/100):0;
+  printDoc(docHead('Facture',`<div><b>N° ${esc(b.invoiceNo)}</b></div><div>Date : ${fD(today())}</div><div>Réservation ${esc(b.ref)}</div>`)+
+  `<p><b>Client :</b> ${esc(gName(g))}${g?.phone?' · '+esc(g.phone):''}${g?.address?'<br>'+esc(g.address):''}</p>
+  <table><thead><tr><th>Date</th><th>Désignation</th><th class="n">Qté</th><th class="n">P.U.</th><th class="n">Montant</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${esc(r[1])}</td><td class="n">${fmtN(r[2])}</td><td class="n">${money(r[3])}</td><td class="n">${money(r[4])}</td></tr>`).join('')}</tbody>
+  <tfoot><tr class="tot"><td colspan="4">Total${tva?` (dont TVA ${s.tva} % : ${money(tva)})`:''}</td><td class="n">${money(f.total)}</td></tr>${(b.payments||[]).map(p=>`<tr><td colspan="4">Payé le ${fD(p.date)} · ${esc(PAY[p.method]||p.method)}${p.note?' · '+esc(p.note):''}</td><td class="n">− ${money(p.amount)}</td></tr>`).join('')}<tr class="tot"><td colspan="4">${f.balance>0.5?'Reste à payer':'Soldé'}</td><td class="n">${money(Math.max(0,f.balance))}</td></tr></tfoot></table>
+  <p style="margin-top:30px;text-align:center">${esc(s.footer)}</p>`)}
+function printPolice(id){const b=bk(id),g=guestOf(b.guestId)||{},u=unitOf(b.unitId);
+  const row=(l,v)=>`<div>${esc(l)}</div><div><b>${esc(v||'………………………………')}</b></div>`;
+  printDoc(docHead('Fiche de police',`<div>Réservation ${esc(b.ref)}</div>`)+`<div class="fl">${row('Nom',g.lastName)}${row('Prénom(s)',g.firstName)}${row('Date de naissance',g.birthDate?fD(g.birthDate):'')}${row('Lieu de naissance',g.birthPlace)}${row('Nationalité',g.nationality)}${row('Profession',g.profession)}${row('Adresse',g.address)}${row('Téléphone',g.phone)}${row('Pièce d’identité',g.idType)}${row('Numéro',g.idNumber)}</div>
+  <div class="fl">${row(K().unit,u?.name)}${row('Date d’arrivée',fD(b.checkIn))}${row('Date de départ prévue',fD(b.checkOut))}${row('Nombre de personnes',String(num(b.adults)+num(b.children)))}${row('Venant de','')}${row('Allant à','')}</div>
+  <div class="sign"><div>Signature du client</div><div>Fait le ${fD(today())}<br>Pour l’établissement</div></div>`)}
+function printReport(){const f=F.rep;printDoc(docHead('Rapport d’activité',`<div>Du ${fD(f.from)} au ${fD(f.to)}</div>`)+reportHtml(f.from,f.to))}
+
+/* ============ Délégation d'événements ============ */
+const A={
+  menu:()=>document.body.classList.toggle('nav-open'),
+  close:closeDlg,
+  'new-booking':(id,el)=>{if(!S.units.length){toast('Ajoutez d’abord vos '+K().units.toLowerCase(),'warn');location.hash='#/unites';return}bookingForm(null,{unit:el.dataset.unit,date:el.dataset.date,guestId:el.dataset.guest})},
+  'open-booking':id=>openBooking(id),
+  'edit-booking':id=>bookingForm(bk(id)),
+  checkin, checkout,
+  'confirm-booking':id=>{bk(id).status='confirmee';save();render();openBooking(id)},
+  'cancel-booking':id=>{const b=bk(id);if(!confirm('Annuler la réservation '+b.ref+' ?'+(b.payments?.length?'\nDes paiements ont été enregistrés : pensez au remboursement éventuel (paiement négatif).':'')))return;b.status='annulee';save();render();openBooking(id);toast('Réservation annulée')},
+  noshow:id=>{const b=bk(id);if(!confirm('Marquer '+b.ref+' comme « non présenté » ?'))return;b.status='noshow';save();render();openBooking(id)},
+  'restore-booking':id=>{const b=bk(id);const c=conflict(b);if(c){toast('Impossible : '+(unitOf(b.unitId)?.name||'')+' est déjà réservé(e) sur ces dates ('+c.ref+').','bad');return}b.status='confirmee';save();render();openBooking(id)},
+  'del-booking':id=>{if(!confirm('Supprimer définitivement cette réservation ?'))return;S.bookings=S.bookings.filter(b=>b.id!==id);save();closeDlg();render()},
+  'add-charge':id=>{const b=bk(id);const sid=$('#ch-svc').value,s=S.services.find(x=>x.id===sid);const label=$('#ch-label').value.trim()||s?.name;const qty=num($('#ch-qty').value),price=$('#ch-price').value===''?num(s?.price):num($('#ch-price').value);const date=$('#ch-date').value;
+    if(!label){toast('Choisissez un service ou saisissez un libellé','bad');return}if(qty<=0){toast('Quantité invalide','bad');return}if(!validDate(date)){toast('Date invalide','bad');return}
+    b.charges.push({id:uid(),date,serviceId:sid,label,category:s?.category||'autre',qty,price});save();render();openBooking(id)},
+  'del-charge':v=>{const[bid,cid]=v.split('|');const b=bk(bid);if(!confirm('Supprimer cette ligne ?'))return;b.charges=b.charges.filter(c=>c.id!==cid);save();render();openBooking(bid)},
+  'add-pay':id=>{const b=bk(id);const amount=num($('#pay-amt').value);if(!amount){toast('Indiquez un montant','bad');return}const date=$('#pay-date').value;if(!validDate(date)){toast('Date invalide','bad');return}
+    b.payments.push({id:uid(),date,amount,method:$('#pay-method').value,note:$('#pay-note').value.trim()});save();toast((amount<0?'Remboursement':'Paiement')+' de '+money(Math.abs(amount))+' enregistré');render();openBooking(id)},
+  'del-pay':v=>{const[bid,pid]=v.split('|');const b=bk(bid);if(!confirm('Supprimer ce paiement ?'))return;b.payments=b.payments.filter(p=>p.id!==pid);save();render();openBooking(bid)},
+  'print-invoice':id=>printInvoice(id),'print-police':id=>printPolice(id),'print-report':printReport,
+  'new-guest':()=>guestForm(),'open-guest':id=>{const g=guestOf(id);if(g)guestForm(g)},
+  'del-guest':id=>{if(S.bookings.some(b=>b.guestId===id)){toast('Ce client a des réservations : il ne peut pas être supprimé.','bad');return}if(!confirm('Supprimer ce client ?'))return;S.guests=S.guests.filter(g=>g.id!==id);save();closeDlg();render()},
+  'new-unit':()=>unitForm(),'edit-unit':id=>unitForm(unitOf(id)),
+  'del-unit':id=>{if(S.bookings.some(b=>b.unitId===id&&isActive(b))){toast('Des réservations sont liées : passez plutôt en « hors service ».','bad');return}if(!confirm('Supprimer définitivement ?'))return;S.units=S.units.filter(u=>u.id!==id);S.tasks=S.tasks.filter(x=>x.unitId!==id);save();closeDlg();render()},
+  'hk-clean':id=>{unitOf(id).hk='propre';for(const x of S.tasks)if(x.unitId===id&&x.kind==='menage'&&x.status!=='fait'){x.status='fait';x.doneAt=today()}save();render()},
+  'new-task':()=>taskForm(),'edit-task':id=>taskForm(S.tasks.find(x=>x.id===id)),
+  'del-task':id=>{if(!confirm('Supprimer cette tâche ?'))return;S.tasks=S.tasks.filter(x=>x.id!==id);save();closeDlg();render()},
+  'new-service':()=>serviceForm(),'edit-service':id=>serviceForm(S.services.find(s=>s.id===id)),
+  sale:id=>saleForm(id),
+  'cash-new':(id,el)=>cashForm(el.dataset.type),
+  'cash-del':id=>{if(!confirm('Supprimer ce mouvement ?'))return;S.cash=S.cash.filter(c=>c.id!==id);save();render()},
+  'cash-range':(id,el)=>{F.cash.to=today();F.cash.from=el.dataset.r==='jour'?today():monthStart();render()},
+  'rep-range':(id,el)=>{const t=today(),r=el.dataset.r;if(r==='mois'){F.rep.from=monthStart();F.rep.to=t}else if(r==='annee'){F.rep.from=t.slice(0,4)+'-01-01';F.rep.to=t}else{const e=addDays(monthStart(),-1);F.rep.from=e.slice(0,8)+'01';F.rep.to=e}render()},
+  'plan-move':(id,el)=>{F.plan.start=addDays(F.plan.start,num(el.dataset.n));render()},
+  'plan-today':()=>{F.plan.start=addDays(today(),-2);render()},
+  'export-res':()=>{const rows=[['Réf.','Client','Téléphone',K().unit,'Arrivée','Départ','Nuits','Adultes','Enfants','Statut','Source','Hébergement','Taxe','Extras','Total','Payé','Reste dû']];for(const b of [...S.bookings].sort((a,c)=>a.checkIn.localeCompare(c.checkIn))){const f=folio(b),g=guestOf(b.guestId);rows.push([b.ref,gName(g),g?.phone,unitOf(b.unitId)?.name,b.checkIn,b.checkOut,f.n,b.adults,b.children,BST[b.status][0],b.source,f.lodging,f.tax,f.extras,f.total,f.paid,f.balance])}download('reservations-'+today()+'.csv',csv(rows),'text/csv')},
+  'export-cash':()=>{const mv=movements(F.cash.from,F.cash.to);download('caisse-'+F.cash.from+'-au-'+F.cash.to+'.csv',csv([['Date','Libellé','Catégorie','Mode','Entrée','Sortie'],...mv.map(m=>[m.date,m.label,m.cat,PAY[m.method]||m.method,m.amount>0?m.amount:'',m.amount<0?-m.amount:''])]),'text/csv')},
+  backup:()=>{download('sauvegarde-'+S.settings.name.replace(/[^\w-]+/g,'-').toLowerCase()+'-'+today()+'.json',JSON.stringify(S,null,1),'application/json');toast('Sauvegarde exportée')},
+  restore:()=>$('#import-file').click(),
+  reset:()=>{if(!confirm('Effacer TOUTES les données de cet appareil ? Exportez une sauvegarde avant si besoin.'))return;if(prompt('Tapez EFFACER pour confirmer')!=='EFFACER')return;S=blank();save();location.hash='';render()}
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el||el.disabled)return;const fn=A[el.dataset.act];if(!fn)return;e.preventDefault();fn(el.dataset.id,el,e)});
+document.addEventListener('click',e=>{if(document.body.classList.contains('nav-open')&&!e.target.closest('#rail')&&!e.target.closest('#menu-btn'))document.body.classList.remove('nav-open')});
+$('#dlg').addEventListener('click',e=>{if(e.target===$('#dlg'))closeDlg()});
+const CHG={
+  hk:(el)=>{const u=unitOf(el.dataset.id);u.hk=el.value;if(el.value==='propre')for(const x of S.tasks)if(x.unitId===u.id&&x.kind==='menage'&&x.status!=='fait'){x.status='fait';x.doneAt=today()}save();render()},
+  'task-status':(el)=>{const x=S.tasks.find(t=>t.id===el.dataset.id);const was=x.status;x.status=el.value;taskDone(x,was);save();render()},
+  'task-st':el=>{F.tasks.st=el.value;render()},'task-kind':el=>{F.tasks.kind=el.value;render()},
+  'units-hk':el=>{F.units.hk=el.value;render()},
+  'res-st':el=>{F.res.st=el.value;$('#res-list').innerHTML=resTable()},'res-when':el=>{F.res.when=el.value;$('#res-list').innerHTML=resTable()},
+  'plan-start':el=>{if(validDate(el.value)){F.plan.start=el.value;render()}},'plan-days':el=>{F.plan.days=num(el.value);render()},
+  'cash-from':el=>{if(validDate(el.value)){F.cash.from=el.value;render()}},'cash-to':el=>{if(validDate(el.value)){F.cash.to=el.value;render()}},
+  'rep-from':el=>{if(validDate(el.value)){F.rep.from=el.value;render()}},'rep-to':el=>{if(validDate(el.value)){F.rep.to=el.value;render()}},
+  'ch-svc':el=>{const s=S.services.find(x=>x.id===el.value);if(s){$('#ch-label').value=s.name;$('#ch-price').value=s.price}}
+};
+document.addEventListener('change',e=>{const el=e.target;if(el.id==='ch-svc')return CHG['ch-svc'](el);const k=el.dataset&&el.dataset.chg;if(k&&CHG[k])CHG[k](el)});
+document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.inp;if(k==='res-q'){F.res.q=e.target.value;$('#res-list').innerHTML=resTable()}if(k==='cli-q'){F.cli.q=e.target.value;$('#cli-list').innerHTML=cliTable()}});
+$('#import-file').addEventListener('change',e=>{const file=e.target.files[0];e.target.value='';if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!d.settings||!Array.isArray(d.units)||!Array.isArray(d.bookings))throw 0;if(!confirm('Remplacer les données actuelles par celles de « '+(d.settings.name||'la sauvegarde')+' » ?'))return;const b=blank();S=Object.assign(b,d,{settings:Object.assign(b.settings,d.settings)});save();render();toast('Sauvegarde importée')}catch(x){toast('Fichier de sauvegarde invalide','bad')}};r.readAsText(file)});
+window.addEventListener('afterprint',()=>{$('#print-area').innerHTML=''});
+window.addEventListener('storage',e=>{if(e.key===KEY){S=load();render()}});
+
+render();
+</script>
+</body></html>
