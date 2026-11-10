@@ -5,6 +5,7 @@ self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.
 self.addEventListener('message',e=>{if(e.data==='skip')self.skipWaiting()});
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(u.origin!==location.origin)return;
   if(/\/(data|souvenirs)\//.test(u.pathname)||u.searchParams.has('t'))return; /* données : toujours en direct */
+  if(u.pathname.includes('/agribio/'))return; /* module AgriBio : géré par son propre service worker */
   const page=r.mode==='navigate'||/\/(index\.html)?$/.test(u.pathname);
   if(page){e.respondWith((async()=>{try{const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),6000);const n=await fetch(r,{signal:ctl.signal});clearTimeout(to);if(n.ok){const c=await caches.open(CACHE);c.put('./index.html',n.clone())}return n}
     catch(x){return (await caches.match('./index.html'))||(await caches.match('./'))||Response.error()}})());return}
